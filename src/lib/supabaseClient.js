@@ -11,14 +11,12 @@ if (typeof window !== 'undefined') {
   const hasAnon = !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!hasUrl || !hasAnon) {
     // Do not print actual values; just signal missing config
-    // eslint-disable-next-line no-console
     console.warn('[Supabase] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. Using placeholders. Login will fail.')
   } else {
     // Minimal format check to catch trailing spaces or malformed values without exposing secrets
     const urlLooksOk = /^https:\/\/.+\.(supabase\.co|supabase\.in)/.test(process.env.NEXT_PUBLIC_SUPABASE_URL)
     const keyLooksJwtLike = typeof process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY === 'string' && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.split('.').length === 3
     if (!urlLooksOk || !keyLooksJwtLike) {
-      // eslint-disable-next-line no-console
       console.warn('[Supabase] Env vars detected but may be malformed (URL should be https://*.supabase.co and key should be a JWT-like string).')
     }
   }

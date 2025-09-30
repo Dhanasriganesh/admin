@@ -154,7 +154,7 @@ const Packages: React.FC = () => {
       } catch (_) { /* ignore */ }
     }
     if (citySlug === 'all') loadThumbs()
-  }, [citySlug])
+  }, [citySlug, LOCATIONS])
   
   // Location management state
   const [hotelLocations, setHotelLocations] = useState<HotelLocation[]>([])
@@ -227,7 +227,7 @@ const Packages: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }, [citySlug])
+  }, [citySlug, cityName])
 
   // Fetch hotel and vehicle locations
   const fetchLocations = useCallback(async () => {
@@ -1075,7 +1075,7 @@ const Packages: React.FC = () => {
         {filteredPackages.length === 0 && (
           <div className="col-span-full">
             <div className="bg-white border border-dashed border-gray-200 rounded-lg p-8 text-center text-gray-600">
-              No itineraries found for {cityName}. Click "Create New Itinerary" to add one.
+              No itineraries found for {cityName}. Click &quot;Create New Itinerary&quot; to add one.
             </div>
           </div>
         )}
@@ -1086,8 +1086,8 @@ const Packages: React.FC = () => {
               {/* Card Header */}
               <div className="relative">
                 {pkg.image && (
-                  <div className="h-24 bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
-                    <img src={pkg.image} alt={pkg.name} className="w-full h-full object-cover" />
+                  <div className="h-24 bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center relative">
+                    <Image src={pkg.image} alt={pkg.name} fill className="object-cover" />
                   </div>
                 )}
                 <div className="absolute top-2 right-2">
