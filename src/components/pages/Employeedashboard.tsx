@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import Image from 'next/image'
 
 const Employeedashboard: React.FC = () => {
   const { user, logout } = useAuth()
@@ -382,8 +383,8 @@ const Employeedashboard: React.FC = () => {
                               {/* Card Header */}
                               <div className="relative">
                                 {pkg.image && (
-                                  <div className="h-24 bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
-                                    <img src={pkg.image} alt={pkg.name} className="w-full h-full object-cover" />
+                                  <div className="h-24 bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center relative">
+                                    <Image src={pkg.image} alt={pkg.name} fill className="object-cover" />
                                   </div>
                                 )}
                                 <div className="absolute top-2 right-2">
@@ -601,7 +602,7 @@ const Employeedashboard: React.FC = () => {
                         </svg>
                       </div>
                       <h3 className="text-lg font-medium text-gray-900 mb-2">No Leads Assigned</h3>
-                      <p className="text-gray-500">You don't have any leads assigned to you yet.</p>
+                      <p className="text-gray-500">You don&apos;t have any leads assigned to you yet.</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

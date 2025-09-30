@@ -96,7 +96,7 @@ const Packages: React.FC = () => {
   // Human-readable city name for storage/display - defined after LOCATIONS below
 
   // Static list of supported locations for selection (matches WebsiteEdit)
-  const LOCATIONS: { slug: string; name: string }[] = [
+  const LOCATIONS: { slug: string; name: string }[] = useMemo(() => [
     { slug: 'kashmir', name: 'Kashmir' },
     { slug: 'ladakh', name: 'Ladakh' },
     { slug: 'gokarna', name: 'Gokarna' },
@@ -107,7 +107,7 @@ const Packages: React.FC = () => {
     { slug: 'hyderabad', name: 'Hyderabad' },
     { slug: 'bengaluru', name: 'Bengaluru' },
     { slug: 'manali', name: 'Manali' }
-  ]
+  ], [])
   
   // Human-readable city name for storage/display
   const cityName = (LOCATIONS.find(l => l.slug === citySlug)?.name) || citySlug

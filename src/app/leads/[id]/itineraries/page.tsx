@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
+import Link from 'next/link'
 
 export default function LeadItinerariesPage() {
   const params = useParams()
@@ -152,7 +153,7 @@ export default function LeadItinerariesPage() {
             <h1 className="text-lg font-semibold text-gray-900">Assign itinerary to {lead?.name ? lead.name : `Lead #${leadId}`}</h1>
             <p className="text-sm text-gray-600">{lead?.phone ? `Phone: ${lead.phone}` : lead?.email ? `Email: ${lead.email}` : ''}</p>
           </div>
-          <a href="/employee" className="text-sm text-primary hover:opacity-80">Back to Dashboard</a>
+          <Link href="/employee" className="text-sm text-primary hover:opacity-80">Back to Dashboard</Link>
         </div>
       </div>
 
