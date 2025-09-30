@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
 import { supabaseServer } from '../../../../lib/supabaseServer.js'
 
-export async function GET(_: Request, { params }: { params: { id: string } }) {
+export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = params?.id
+    const resolvedParams = await params
+    const id = resolvedParams?.id
     if (!id) return NextResponse.json({ error: 'id is required' }, { status: 400 })
 
     const { data, error } = await supabaseServer
