@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabaseClient'
+import { supabaseServer } from '@/lib/supabaseServer'
 
 // GET /api/employees?destination=Kashmir
 export async function GET(request) {
@@ -7,7 +7,7 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url)
     const destination = searchParams.get('destination')
 
-    let query = supabase
+    let query = supabaseServer
       .from('employees')
       .select('id, name, email, phone, destination, role, status')
       .order('name', { ascending: true })

@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabaseClient'
+import { supabaseServerServer } from '@/lib/supabaseServerServer'
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
     const locationId = searchParams.get('locationId')
 
-    let query = supabase
+    let query = supabaseServer
       .from('vehicles')
       .select('*')
       .order('created_at', { ascending: false })
@@ -32,7 +32,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'vehicleType and locationId are required' }, { status: 400 })
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseServer
       .from('vehicles')
       .insert([
         {

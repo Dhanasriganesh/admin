@@ -38,6 +38,9 @@ const Employeedashboard: React.FC = () => {
   const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false)
   const [assignedLeads, setAssignedLeads] = useState<Array<any>>([])
   const [activeSection, setActiveSection] = useState<'itineraries' | 'leads'>('itineraries')
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null)
+  const [selectedItinerary, setSelectedItinerary] = useState<any>(null)
+  const [showPaymentPage, setShowPaymentPage] = useState<boolean>(false)
 
   // Location/asset resolution state (to mirror Packages page card fields)
   interface HotelLocation { id: string; name: string; city: string }
@@ -52,6 +55,12 @@ const Employeedashboard: React.FC = () => {
   const [fixedDaysOptions, setFixedDaysOptions] = useState<Array<{ id: string; days: number; label: string }>>([])
   const [fixedLocations, setFixedLocations] = useState<Array<{ id: string; name: string; city: string }>>([])
   const [fixedPlansByLocation, setFixedPlansByLocation] = useState<Record<string, Array<{ id: string; name: string }>>>({})
+  
+  // Lead itineraries state
+  const [leadItineraries, setLeadItineraries] = useState<any[]>([])
+  const [leadItinerariesLoading, setLeadItinerariesLoading] = useState<boolean>(false)
+  const [leadItinerariesError, setLeadItinerariesError] = useState<string | null>(null)
+  const [selectedLead, setSelectedLead] = useState<any>(null)
   
   // Helper to normalize city name to slug (e.g., "Ladakh" -> "ladakh")
   const toSlug = (value: string): string => {
@@ -196,6 +205,59 @@ const Employeedashboard: React.FC = () => {
     window.location.href = '/login'
   }
 
+  // Load lead itineraries when a lead is selected
+  const loadLeadItineraries = async (leadId: string) => {
+    try {
+      setLeadItinerariesLoading(true)
+      setLeadItinerariesError(null)
+      
+      // Find the selected lead
+      const lead = assignedLeads.find(l => l.id.toString() === leadId)
+      setSelectedLead(lead)
+      
+      // Load lead details
+      const leadRes = await fetch(`/api/leads/${leadId}`)
+      const leadData = await leadRes.json().catch(() => ({ lead: null }))
+      if (leadRes.ok) setSelectedLead(leadData.lead || lead)
+      
+      // Load itineraries
+      const res = await fetch('/api/packages')
+      const data = await res.json()
+      if (res.ok) {
+        setLeadItineraries(data.packages || [])
+      } else {
+        setLeadItinerariesError(data.error || 'Failed to load itineraries')
+      }
+    } catch (error) {
+      setLeadItinerariesError('Failed to load itineraries')
+    } finally {
+      setLeadItinerariesLoading(false)
+    }
+  }
+
+  // Assign itinerary function
+  const assignItinerary = (itinerary: any) => {
+    if (!selectedLeadId) return
+    
+    try {
+      const map = JSON.parse(localStorage.getItem('leadItineraryAssignments') || '{}')
+      map[selectedLeadId] = itinerary.id
+      localStorage.setItem('leadItineraryAssignments', JSON.stringify(map))
+      
+      // Set the selected itinerary and show payment page
+      setSelectedItinerary(itinerary)
+      setShowPaymentPage(true)
+    } catch (e: any) {
+      alert('Failed to assign itinerary')
+    }
+  }
+
+  // Generate and send payment link function
+  const generatePaymentLink = () => {
+    // Here you can implement the payment link generation logic
+    alert('Payment link generated and sent to the member!')
+  }
+
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
@@ -323,8 +385,467 @@ const Employeedashboard: React.FC = () => {
         {/* Content */}
         <main className="p-4">
           <div className="w-full">
-            {/* Itineraries Section */}
-            {activeSection === 'itineraries' && (
+            {/* Payment Page */}
+            {showPaymentPage && selectedLead && selectedItinerary ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => setShowPaymentPage(false)}
+                        className="h-8 w-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors"
+                      >
+                        <svg className="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <div className="h-8 w-8 bg-green-500 rounded-lg flex items-center justify-center">
+                        <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-semibold text-gray-900">
+                          {selectedItinerary.destination} assigning to {selectedLead.name}
+                        </h2>
+                        <p className="text-sm text-gray-600">Generate payment link for the assigned itinerary</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Member Details Section */}
+                    <div className="bg-gray-50 rounded-lg p-6">
+                      <div className="flex items-center space-x-3 mb-4">
+                        <div className="h-8 w-8 bg-primary/20 rounded-lg flex items-center justify-center">
+                          <svg className="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900">Member Details</h3>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="h-10 w-10 bg-primary/20 rounded-full flex items-center justify-center">
+                            <span className="text-primary font-semibold text-sm">
+                              {(selectedLead.name || 'Lead').charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-gray-900">{selectedLead.name || 'Unnamed Lead'}</h4>
+                            <p className="text-sm text-gray-500">Lead ID: #{selectedLead.id}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <div>
+                            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Contact Information</label>
+                            <div className="mt-1 space-y-2">
+                              {selectedLead.email && (
+                                <div className="flex items-center space-x-2">
+                                  <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                  </svg>
+                                  <span className="text-sm text-gray-900">{selectedLead.email}</span>
+                                </div>
+                              )}
+                              {selectedLead.phone && (
+                                <div className="flex items-center space-x-2">
+                                  <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                  </svg>
+                                  <span className="text-sm text-gray-900">{selectedLead.phone}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {selectedLead.destination && (
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Travel Destination</label>
+                              <div className="mt-1 flex items-center space-x-2">
+                                <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span className="text-sm text-gray-900">{selectedLead.destination}</span>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {selectedLead.number_of_travelers && (
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Travel Details</label>
+                              <div className="mt-1 flex items-center space-x-2">
+                                <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span className="text-sm text-gray-900">{selectedLead.number_of_travelers} travelers</span>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {selectedLead.travel_dates && (
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Travel Dates</label>
+                              <div className="mt-1">
+                                <span className="text-sm text-gray-900">{selectedLead.travel_dates}</span>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {selectedLead.custom_notes && (
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Notes</label>
+                              <div className="mt-1">
+                                <p className="text-sm text-gray-700 bg-white p-3 rounded-md border">{selectedLead.custom_notes}</p>
+                              </div>
+                            </div>
+                          )}
+                          
+                          <div>
+                            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Lead Status</label>
+                            <div className="mt-1">
+                              <span className="inline-flex px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                                Active
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Itinerary Details Section */}
+                    <div className="bg-gray-50 rounded-lg p-6">
+                      <div className="flex items-center space-x-3 mb-4">
+                        <div className="h-8 w-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                          <svg className="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900">Itinerary Details</h3>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-medium text-gray-900 text-lg mb-2">{selectedItinerary.name}</h4>
+                          <div className="flex items-center space-x-2 text-sm text-gray-600 mb-3">
+                            <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span>{selectedItinerary.destination}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <div>
+                            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Package Information</label>
+                            <div className="mt-2 space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-gray-600">Plan Type:</span>
+                                <span className="font-medium text-gray-900">{selectedItinerary.plan_type || 'Custom'}</span>
+                              </div>
+                              {selectedItinerary.service_type && (
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600">Service Type:</span>
+                                  <span className="font-medium text-gray-900">{selectedItinerary.service_type}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {/* Hotel Details */}
+                          {selectedItinerary.selected_hotel_id && (() => {
+                            const hotel = hotels.find(h => h.id === selectedItinerary.selected_hotel_id)
+                            return hotel ? (
+                              <div>
+                                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Hotel Information</label>
+                                <div className="mt-2 space-y-2">
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-gray-600">Hotel:</span>
+                                    <span className="font-medium text-gray-900">{hotel.name}</span>
+                                  </div>
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-gray-600">Map Rate:</span>
+                                    <span className="font-medium text-gray-900">₹{hotel.map_rate || 0}</span>
+                                  </div>
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-gray-600">EB:</span>
+                                    <span className="font-medium text-gray-900">₹{hotel.eb || 0}</span>
+                                  </div>
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-gray-600">Category:</span>
+                                    <span className="font-medium text-gray-900">{hotel.category || 'N/A'}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : null
+                          })()}
+                          
+                          {/* Vehicle Details */}
+                          {selectedItinerary.selected_vehicle_id && (() => {
+                            const vehicle = vehicles.find(v => v.id === selectedItinerary.selected_vehicle_id)
+                            return vehicle ? (
+                              <div>
+                                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Vehicle Information</label>
+                                <div className="mt-2 space-y-2">
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-gray-600">Vehicle Type:</span>
+                                    <span className="font-medium text-gray-900">{vehicle.vehicle_type}</span>
+                                  </div>
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-gray-600">Rate:</span>
+                                    <span className="font-medium text-gray-900">₹{(vehicle as any).rate ?? 0}</span>
+                                  </div>
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-gray-600">AC Extra:</span>
+                                    <span className="font-medium text-gray-900">₹{(vehicle as any).ac_extra ?? 0}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : null
+                          })()}
+                          
+                          {/* Fixed Plan Details */}
+                          {selectedItinerary.fixed_days_id && (
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Fixed Plan Details</label>
+                              <div className="mt-2 space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600">Duration:</span>
+                                  <span className="font-medium text-gray-900">{fixedDaysOptions.find(d => d.id === selectedItinerary.fixed_days_id)?.days || '-'} days</span>
+                                </div>
+                                {selectedItinerary.fixed_adults && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-gray-600">Adults:</span>
+                                    <span className="font-medium text-gray-900">{selectedItinerary.fixed_adults}</span>
+                                  </div>
+                                )}
+                                {selectedItinerary.fixed_price_per_person && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-gray-600">Price per Person:</span>
+                                    <span className="font-medium text-gray-900">₹{selectedItinerary.fixed_price_per_person}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                          
+                          <div>
+                            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Package Status</label>
+                            <div className="mt-1">
+                              <span className="inline-flex px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                                {selectedItinerary.status || 'Active'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Generate Payment Link Button */}
+                  <div className="mt-8 flex justify-center">
+                    <button
+                      onClick={generatePaymentLink}
+                      className="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-8 rounded-lg transition-colors duration-200 flex items-center space-x-2 shadow-lg"
+                    >
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                      <span>Generate and Send Payment Link</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Lead Itineraries Section */}
+                {selectedLeadId ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => setSelectedLeadId(null)}
+                        className="h-8 w-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors"
+                      >
+                        <svg className="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <div className="h-8 w-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                        <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-semibold text-gray-900">
+                          Assign itinerary to {selectedLead?.name ? selectedLead.name : `Lead #${selectedLeadId}`}
+                        </h2>
+                        <p className="text-sm text-gray-600">
+                          {selectedLead?.phone ? `Phone: ${selectedLead.phone}` : selectedLead?.email ? `Email: ${selectedLead.email}` : ''}
+                        </p>
+                      </div>
+                    </div>
+                    {leadItinerariesLoading && (
+                      <div className="flex items-center space-x-2 text-sm text-gray-500">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                        <span>Loading itineraries...</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="p-6">
+                  {leadItinerariesError ? (
+                    <div className="bg-red-50 border border-red-200 text-sm text-red-700 px-3 py-2 rounded">
+                      {leadItinerariesError}
+                    </div>
+                  ) : leadItinerariesLoading ? (
+                    <div className="text-sm text-gray-600">Loading itineraries...</div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                      {leadItineraries.map((pkg: any) => {
+                        const isAssigned = (() => {
+                          try {
+                            const map = JSON.parse(localStorage.getItem('leadItineraryAssignments') || '{}')
+                            return map[selectedLeadId] === pkg.id
+                          } catch (_) {
+                            return false
+                          }
+                        })()
+                        
+                        return (
+                          <div key={pkg.id} className="group bg-white border border-gray-200 rounded-lg hover:shadow-md hover:border-primary transition-all duration-200 overflow-hidden">
+                            <div className="p-3">
+                              <div className="mb-2">
+                                <h3 className="text-sm font-semibold text-gray-900 mb-1 group-hover:text-primary transition-colors line-clamp-2">
+                                  {pkg.name}
+                                </h3>
+                                <div className="flex items-center text-xs text-gray-600 mb-1">
+                                  <svg className="h-3 w-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  </svg>
+                                  <span className="font-medium">{pkg.destination}</span>
+                                </div>
+                                {'route' in pkg && pkg.route && (
+                                  <div className="flex items-center text-xs text-gray-500">
+                                    <svg className="h-3 w-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>{pkg.route}</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Details similar to dashboard (compact) */}
+                              <div className="space-y-1.5 mb-2">
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="text-gray-500">Plan</span>
+                                  <span className="font-medium text-gray-900">{pkg.plan_type || 'Custom'}</span>
+                                </div>
+                                {pkg.service_type && (
+                                  <div className="flex items-center justify-between text-xs">
+                                    <span className="text-gray-500">Service</span>
+                                    <span className="font-medium text-gray-900">{pkg.service_type}</span>
+                                  </div>
+                                )}
+                                {/* Custom-plan fields */}
+                                {pkg.hotel_location_id && (
+                                  <div className="flex items-center justify-between text-xs">
+                                    <span className="text-gray-500">Hotel Location</span>
+                                    <span className="font-medium text-gray-900">{hotelLocations.find(l => l.id === pkg.hotel_location_id)?.name || pkg.hotel_location_id}</span>
+                                  </div>
+                                )}
+                                {pkg.selected_hotel_id && (() => {
+                                  const hotel = hotels.find(h => h.id === pkg.selected_hotel_id)
+                                  return hotel ? (
+                                    <>
+                                      <div className="flex items-center justify-between text-xs"><span className="text-gray-500">Hotel</span><span className="font-medium text-gray-900">{hotel.name}</span></div>
+                                      <div className="flex items-center justify-between text-xs"><span className="text-gray-500">Map Rate</span><span className="font-medium text-gray-900">₹{hotel.map_rate || 0}</span></div>
+                                      <div className="flex items-center justify-between text-xs"><span className="text-gray-500">EB</span><span className="font-medium text-gray-900">₹{hotel.eb || 0}</span></div>
+                                      <div className="flex items-center justify-between text-xs"><span className="text-gray-500">Category</span><span className="font-medium text-gray-900">{hotel.category || 'N/A'}</span></div>
+                                    </>
+                                  ) : null
+                                })()}
+                                {pkg.vehicle_location_id && (
+                                  <div className="flex items-center justify-between text-xs">
+                                    <span className="text-gray-500">Vehicle Location</span>
+                                    <span className="font-medium text-gray-900">{vehicleLocations.find(l => l.id === pkg.vehicle_location_id)?.name || pkg.vehicle_location_id}</span>
+                                  </div>
+                                )}
+                                {pkg.selected_vehicle_id && (() => {
+                                  const vehicle = vehicles.find(v => v.id === pkg.selected_vehicle_id)
+                                  return vehicle ? (
+                                    <>
+                                      <div className="flex items-center justify-between text-xs"><span className="text-gray-500">Vehicle</span><span className="font-medium text-gray-900">{vehicle.vehicle_type}</span></div>
+                                      <div className="flex items-center justify-between text-xs"><span className="text-gray-500">Rate</span><span className="font-medium text-gray-900">₹{(vehicle as any).rate ?? 0}</span></div>
+                                      <div className="flex items-center justify-between text-xs"><span className="text-gray-500">AC Extra</span><span className="font-medium text-gray-900">₹{(vehicle as any).ac_extra ?? 0}</span></div>
+                                    </>
+                                  ) : null
+                                })()}
+                                {pkg.fixed_days_id && (
+                                  <div className="flex items-center justify-between text-xs">
+                                    <span className="text-gray-500">Fixed Days</span>
+                                    <span className="font-medium text-gray-900">{fixedDaysOptions.find(d => d.id === pkg.fixed_days_id)?.days || '-'}</span>
+                                  </div>
+                                )}
+                                {pkg.fixed_location_id && (
+                                  <div className="flex items-center justify-between text-xs">
+                                    <span className="text-gray-500">Fixed Location</span>
+                                    <span className="font-medium text-gray-900">{fixedLocations.find(l => l.id === pkg.fixed_location_id)?.name || pkg.fixed_location_id}</span>
+                                  </div>
+                                )}
+                                {pkg.fixed_plan_id && (
+                                  <div className="flex items-center justify-between text-xs">
+                                    <span className="text-gray-500">Fixed Plan</span>
+                                    <span className="font-medium text-gray-900">{fixedPlansByLocation[pkg.fixed_location_id || '']?.find(p => p.id === pkg.fixed_plan_id)?.name || pkg.fixed_plan_id}</span>
+                                  </div>
+                                )}
+                                {!!(pkg.fixed_adults ?? 0) && (
+                                  <div className="flex items-center justify-between text-xs">
+                                    <span className="text-gray-500">Adults</span>
+                                    <span className="font-medium text-gray-900">{pkg.fixed_adults}</span>
+                                  </div>
+                                )}
+                                {!!(pkg.fixed_price_per_person ?? 0) && (
+                                  <div className="flex items-center justify-between text-xs">
+                                    <span className="text-gray-500">Price/Person</span>
+                                    <span className="font-medium text-gray-900">₹{pkg.fixed_price_per_person}</span>
+                                  </div>
+                                )}
+                                {pkg.fixed_rooms_vehicle && (
+                                  <div className="flex items-center justify-between text-xs">
+                                    <span className="text-gray-500">Rooms & Vehicle</span>
+                                    <span className="font-medium text-gray-900">{pkg.fixed_rooms_vehicle}</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              <button
+                                onClick={() => assignItinerary(pkg)}
+                                className={`w-full mt-2 py-1.5 text-xs rounded-md ${isAssigned ? 'bg-green-100 text-green-700 border border-green-300' : 'bg-primary/10 text-primary hover:bg-primary/20'} transition-colors`}
+                              >
+                                {isAssigned ? 'Assigned' : 'Assign this itinerary'}
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Itineraries Section */}
+                {activeSection === 'itineraries' && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-100">
                   <div className="flex items-center justify-between">
@@ -613,7 +1134,8 @@ const Employeedashboard: React.FC = () => {
                             key={lead.id}
                             className="group bg-white border border-gray-200 rounded-lg hover:shadow-md hover:border-primary transition-all duration-200 overflow-hidden cursor-pointer"
                             onClick={() => {
-                              window.location.href = `/leads/${lead.id}/itineraries`
+                              setSelectedLeadId(lead.id.toString())
+                              loadLeadItineraries(lead.id.toString())
                             }}
                           >
                             {/* Card Header */}
@@ -724,20 +1246,21 @@ const Employeedashboard: React.FC = () => {
                                   <div className="h-2 w-2 bg-primary rounded-full"></div>
                                   <span className="text-xs text-gray-600">Active Lead</span>
                                 </div>
-                                <button 
-                                  onClick={() => {
-                                    if (isExpanded) {
-                                      setExpandedLeads(prev => {
-                                        const newSet = new Set(prev)
-                                        newSet.delete(lead.id)
-                                        return newSet
-                                      })
-                                    } else {
-                                      setExpandedLeads(prev => new Set(prev).add(lead.id))
-                                    }
-                                  }}
-                                  className="text-primary hover:text-primary/80 text-xs font-medium flex items-center space-x-1 transition-colors"
-                                >
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation() // Prevent card click navigation
+                                if (isExpanded) {
+                                  setExpandedLeads(prev => {
+                                    const newSet = new Set(prev)
+                                    newSet.delete(lead.id)
+                                    return newSet
+                                  })
+                                } else {
+                                  setExpandedLeads(prev => new Set(prev).add(lead.id))
+                                }
+                              }}
+                              className="text-primary hover:text-primary/80 text-xs font-medium flex items-center space-x-1 transition-colors"
+                            >
                                   <span>{isExpanded ? 'Hide Details' : 'View Details'}</span>
                                   <svg className={`h-3 w-3 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -753,6 +1276,8 @@ const Employeedashboard: React.FC = () => {
                 </div>
                   </div>
                 )}
+              </>
+            )}
 
             {showDetails && selected && (
               <div className="fixed inset-0 bg-black/20 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
@@ -796,6 +1321,8 @@ const Employeedashboard: React.FC = () => {
                 </div>
               </div>
             )}
+                </>
+              )}
 
             {/* Removed static "Assigned To You" list */}
           </div>

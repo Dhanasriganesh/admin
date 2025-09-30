@@ -846,42 +846,71 @@ const WebsiteEdit: React.FC = () => {
   }
 
   // No city selected → show the 7 location cards
-  // Preload hero images for all locations and cache in sessionStorage for instant subsequent loads
+  // Preload hero images for all locations and cache in localStorage for instant subsequent loads
   useEffect(() => {
     const loadThumbs = async () => {
       try {
-        const cacheKey = 'cmsHeroThumbs:v1'
-        const cached = typeof window !== 'undefined' ? sessionStorage.getItem(cacheKey) : null
+        const cacheKey = 'cmsHeroThumbs:v2'
+        const cached = typeof window !== 'undefined' ? localStorage.getItem(cacheKey) : null
         if (!thumbsLoadedRef.current && cached) {
-          try { setHeroThumbs(JSON.parse(cached)) } catch { /* ignore */ }
-          thumbsLoadedRef.current = true
-          return
+          try { 
+            const parsed = JSON.parse(cached)
+            // Check if cache is not too old (24 hours)
+            if (parsed.timestamp && Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
+              setHeroThumbs(parsed.data || {})
+              thumbsLoadedRef.current = true
+              return
+            }
+          } catch { /* ignore */ }
         }
         if (thumbsLoadedRef.current) return
 
-        const entries = await Promise.all(
+        // Load images with better error handling and concurrent loading
+        const entries = await Promise.allSettled(
           LOCATIONS.map(async (loc) => {
             try {
-              const res = await fetch(`/api/cms/cities/${loc.slug}`)
+              const res = await fetch(`/api/cms/cities/${loc.slug}`, {
+                cache: 'force-cache', // Use browser cache
+                headers: { 'Cache-Control': 'max-age=3600' }
+              })
               if (!res.ok) return [loc.slug, ''] as const
               const data = await res.json().catch(() => ({}))
               const url = data?.hero?.backgroundImageUrl || ''
-              // Warm up browser cache for quicker paint
+              
+              // Preload image with better error handling
               if (url) {
-                const img = new window.Image()
-                img.src = url
+                return new Promise<[string, string]>((resolve) => {
+                  const img = new window.Image()
+                  img.onload = () => resolve([loc.slug, url])
+                  img.onerror = () => resolve([loc.slug, ''])
+                  img.src = url
+                  // Fallback timeout
+                  setTimeout(() => resolve([loc.slug, url]), 2000)
+                })
               }
-              return [loc.slug, url] as const
+              return [loc.slug, ''] as const
             } catch (_) {
               return [loc.slug, ''] as const
             }
           })
         )
+        
         const map: Record<string, string> = {}
-        entries.forEach(([slug, url]) => { if (url) map[slug] = url })
+        entries.forEach((result) => {
+          if (result.status === 'fulfilled') {
+            const [slug, url] = result.value
+            if (url) map[slug] = url
+          }
+        })
+        
         if (Object.keys(map).length) {
           setHeroThumbs(map)
-          try { sessionStorage.setItem(cacheKey, JSON.stringify(map)) } catch { /* ignore */ }
+          try { 
+            localStorage.setItem(cacheKey, JSON.stringify({
+              data: map,
+              timestamp: Date.now()
+            }))
+          } catch { /* ignore */ }
         }
         thumbsLoadedRef.current = true
       } catch (_) { /* ignore */ }
@@ -912,13 +941,18 @@ const WebsiteEdit: React.FC = () => {
                     alt={`${loc.name} hero`}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width:1024px) 50vw, 33vw"
-                    priority={idx < 4}
-                    fetchPriority={idx < 4 ? 'high' : 'auto'}
-                    className="object-cover"
-                    unoptimized
+                    priority={idx < 6} // Prioritize first 6 images
+                    fetchPriority={idx < 6 ? 'high' : 'low'}
+                    className="object-cover transition-opacity duration-200"
+                    placeholder="blur"
+                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+                    quality={85}
+                    unoptimized={false} // Enable optimization for better performance
                   />
                 ) : (
-                  <span className="text-gray-500 font-medium text-sm">{loc.name}</span>
+                  <div className="flex items-center justify-center h-full">
+                    <span className="text-gray-500 font-medium text-sm animate-pulse">{loc.name}</span>
+                  </div>
                 )}
               </div>
               <div className="flex items-center justify-between">

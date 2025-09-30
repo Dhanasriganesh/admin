@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabaseClient'
+import { supabaseServer } from '@/lib/supabaseServer'
 
 // GET - Fetch a specific itinerary by ID (from either custom or fixed tables)
 export async function GET(request, { params }) {
@@ -7,8 +7,8 @@ export async function GET(request, { params }) {
     const { id } = params
 
     const [customRes, fixedRes] = await Promise.all([
-      supabase.from('itineraries_for_custom').select('*').eq('id', id).limit(1),
-      supabase.from('itineraries_for_fixed').select('*').eq('id', id).limit(1)
+      supabaseServer.from('itineraries_for_custom').select('*').eq('id', id).limit(1),
+      supabaseServer.from('itineraries_for_fixed').select('*').eq('id', id).limit(1)
     ])
 
     if (customRes.error && !(customRes.error.message || '').includes('does not exist')) {
@@ -36,8 +36,8 @@ export async function PUT(request, { params }) {
 
     // Determine table by probing
     const [customCheck, fixedCheck] = await Promise.all([
-      supabase.from('itineraries_for_custom').select('id').eq('id', id).limit(1),
-      supabase.from('itineraries_for_fixed').select('id').eq('id', id).limit(1)
+      supabaseServer.from('itineraries_for_custom').select('id').eq('id', id).limit(1),
+      supabaseServer.from('itineraries_for_fixed').select('id').eq('id', id).limit(1)
     ])
 
     if ((customCheck.error && !(customCheck.error.message || '').includes('does not exist')) ||
@@ -94,7 +94,7 @@ export async function PUT(request, { params }) {
       })
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseServer
       .from(table)
       .update(updates)
       .eq('id', id)
