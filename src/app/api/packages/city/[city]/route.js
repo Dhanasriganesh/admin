@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '../../../../../lib/supabaseClient.js'
+import { supabaseServer } from '../../../../../lib/supabaseServer.js'
 
 // GET - Fetch packages filtered by city location. Prefer exact match on `route` (stored location),
 // then fallback to destination ILIKE for backwards compatibility.
@@ -11,31 +11,31 @@ export async function GET(request, { params }) {
     }
 
     const pattern = `%${city}%`
-    // First try strict match by route (the stored location field)
-    const byRoute = await supabase
-      .from('packages')
-      .select('*')
-      .eq('route', city)
-      .order('created_at', { ascending: false })
+    
+    // Query both itineraries tables and combine results
+    const [customRes, fixedRes] = await Promise.all([
+      supabaseServer.from('itineraries_for_custom').select('*'),
+      supabaseServer.from('itineraries_for_fixed').select('*')
+    ])
 
-    if (byRoute.error) {
-      return NextResponse.json({ error: byRoute.error.message }, { status: 500 })
+    if (customRes.error && !customRes.error.message?.includes('does not exist')) {
+      return NextResponse.json({ error: customRes.error.message }, { status: 500 })
+    }
+    if (fixedRes.error && !fixedRes.error.message?.includes('does not exist')) {
+      return NextResponse.json({ error: fixedRes.error.message }, { status: 500 })
     }
 
-    let data = byRoute.data || []
+    // Combine and filter by city
+    const combined = [...(customRes.data || []), ...(fixedRes.data || [])]
+    const filtered = combined.filter(pkg => {
+      // First try strict match by route
+      if (pkg.route === city) return true
+      // Fallback to destination ILIKE pattern
+      if (pkg.destination && pkg.destination.toLowerCase().includes(city.toLowerCase())) return true
+      return false
+    }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
-    // If empty, fallback to destination ILIKE pattern
-    if (!data.length) {
-      const byDest = await supabase
-        .from('packages')
-        .select('*')
-        .ilike('destination', pattern)
-        .order('created_at', { ascending: false })
-      if (byDest.error) {
-        return NextResponse.json({ error: byDest.error.message }, { status: 500 })
-      }
-      data = byDest.data || []
-    }
+    const data = filtered
 
     return NextResponse.json({ packages: data || [] })
   } catch (error) {

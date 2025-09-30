@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabaseClient'
+import { supabaseServer } from '@/lib/supabaseServer'
 
 // GET - Fetch all itineraries from both custom and fixed tables
 export async function GET() {
   try {
     const [customRes, fixedRes] = await Promise.all([
-      supabase.from('itineraries_for_custom').select('*'),
-      supabase.from('itineraries_for_fixed').select('*')
+      supabaseServer.from('itineraries_for_custom').select('*'),
+      supabaseServer.from('itineraries_for_fixed').select('*')
     ])
 
     if (customRes.error) {
@@ -104,7 +104,7 @@ export async function POST(request) {
       }
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseServer
       .from(table)
       .insert([insertData])
       .select()
