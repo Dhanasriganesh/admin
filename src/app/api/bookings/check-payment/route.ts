@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Find the booking
-    let booking
+    let booking: any = null
     if (bookingId) {
       const { data, error } = await supabase
         .from('bookings')
@@ -58,6 +58,14 @@ export async function POST(request: NextRequest) {
         )
       }
       booking = data
+    }
+    
+    // Ensure booking was found
+    if (!booking) {
+      return NextResponse.json(
+        { error: 'Booking not found' },
+        { status: 404 }
+      )
     }
     
     // Check payment status with Razorpay
