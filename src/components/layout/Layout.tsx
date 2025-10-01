@@ -37,7 +37,7 @@ interface LayoutProps {
 const navigationSections: NavigationSection[] = [
   {
     items: [
-      // { name: 'Dashboard', href: '/', icon: HomeIcon },
+      { name: 'Dashboard', href: '/', icon: HomeIcon },
       { name: 'Employees', href: '/employees', icon: UserGroupIcon }
     ]
   },
@@ -46,7 +46,7 @@ const navigationSections: NavigationSection[] = [
     items: [
       { name: 'Leads', href: '/leads', icon: UserGroupIcon },
       { name: 'Bookings', href: '/bookings', icon: ClipboardDocumentListIcon },
-      // { name: 'Payments', href: '/payments', icon: CurrencyDollarIcon },
+      { name: 'Payments', href: '/payments', icon: CurrencyDollarIcon },
       { name: 'Reports', href: '/reports', icon: ChartBarIcon }
     ]
   },
@@ -54,7 +54,7 @@ const navigationSections: NavigationSection[] = [
     title: 'CMS',
     items: [
       { name: 'Website Edit', href: '/website-edit', icon: DocumentTextIcon },
-      { name: 'Itenarary Builder', href: '/packages', icon: ClipboardDocumentListIcon },
+      { name: 'Itinarary Builder', href: '/packages', icon: ClipboardDocumentListIcon },
       { name: 'Settings', href: '/settings', icon: CogIcon }
     ]
   }
@@ -111,7 +111,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       } ${sidebarCollapsed ? 'w-16' : 'w-56'}`}>
         {/* Logo Section */}
-        <div className="flex items-center justify-between h-12 px-3 border-b border-gray-100">
+        <div className="flex items-center justify-between h-14 px-3 py-2 border-b border-gray-100">
           {!sidebarCollapsed && (
             <Link to="/" className="relative inline-flex items-center px-2 py-1 rounded-md">
               <div className="absolute inset-0 rounded-md bg-primary" />
@@ -144,16 +144,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 mt-4 px-2">
-          <div className="space-y-3">
+        <nav className="flex-1 mt-4 px-3">
+          <div className="space-y-1">
             {navigationSections.map((section, idx) => (
               <div key={idx}>
                 {section.title && !sidebarCollapsed && (
-                  <div className="px-2 pb-1 text-[10px] font-semibold tracking-wider text-gray-400 uppercase">
+                  <div className="px-3 pt-4 pb-2 text-[11px] font-semibold tracking-wide text-gray-400 uppercase">
                     {section.title}
                   </div>
                 )}
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   {section.items.map((item) => {
                     const isActive = location.pathname === item.href
                     return (
@@ -166,15 +166,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             setSidebarOpen(false)
                           }
                         }}
-                        className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+                        className={`group flex items-center px-3 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 relative ${
                           isActive
-                            ? 'bg-primary text-white shadow-sm'
-                            : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                            ? 'bg-blue-50 text-blue-600'
+                            : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                         }`}
                         title={sidebarCollapsed ? item.name : undefined}
                       >
-                        <item.icon className={`h-4 w-4 ${
-                          isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-600'
+                        {/* Active indicator line */}
+                        {isActive && !sidebarCollapsed && (
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-600 rounded-r-full"></div>
+                        )}
+                        
+                        <item.icon className={`h-5 w-5 flex-shrink-0 ${
+                          isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
                         } ${sidebarCollapsed ? '' : 'mr-3'}`} />
                         {!sidebarCollapsed && (
                           <span className="truncate">{item.name}</span>
@@ -218,7 +223,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
         <header className="bg-white shadow-sm border-b border-gray-100 flex-shrink-0">
-          <div className="flex items-center justify-between h-12 px-4">
+          <div className="flex items-center justify-between px-6 py-3">
             <button
               className="lg:hidden p-1.5 text-gray-400 hover:text-gray-600"
               onClick={() => setSidebarOpen(true)}
@@ -226,12 +231,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <ChevronRightIcon className="h-5 w-5" />
             </button>
             
-            <div className="flex items-center justify-between w-full">
-              {/* Left side - empty for now */}
-              <div className="flex-1"></div>
-              
-              {/* Center - Search Bar */}
-              <div className="relative flex-1 max-w-md mx-4">
+            <div className="flex items-center justify-between w-full gap-4">
+              {/* Left side - Search Bar */}
+              <div className="relative flex-1 max-w-md">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -242,29 +244,34 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   placeholder="Search sections, content, and more..."
                   value={searchQuery}
                   onChange={(e) => handleSearch(e.target.value)}
-                  className="block w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-white shadow-sm"
+                  className="block w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
                 />
               </div>
               
               {/* Right side */}
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-4">
                 {/* Notifications Bell Icon */}
-                <button className="relative p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors">
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-6-6V4c0-1.657-1.343-3-3-3S9 2.343 9 4v7l-6 6v1h12v-1zM12 22c1.103 0 2-.897 2-2h-4c0 1.103.897 2 2 2z" />
-                  </svg>
-                  <span className="absolute top-0.5 right-0.5 h-1.5 w-1.5 bg-red-500 rounded-full"></span>
-                </button>
                 
-                {/* User Avatar with Logout Modal */}
+                
+                {/* User Profile with Avatar and Info */}
                 <button 
                   onClick={() => setShowLogoutModal(true)}
-                  className="h-6 w-6 bg-primary rounded-full flex items-center justify-center hover:bg-primary/80 transition-colors"
+                  className="flex items-center space-x-3 hover:bg-gray-50 rounded-lg px-3 py-2 transition-colors"
                   title="Click to logout"
                 >
-                  <span className="text-white text-xs font-medium">
-                    {user?.name?.charAt(0).toUpperCase() || 'U'}
-                  </span>
+                  <div className="h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-gray-700 text-sm font-semibold">
+                      {user?.name?.split(' ').map(n => n.charAt(0)).join('').slice(0, 2).toUpperCase() || 'AD'}
+                    </span>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-gray-900">
+                      {user?.name || 'Admin User'}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {user?.email || 'admin@travloger.com'}
+                    </p>
+                  </div>
                 </button>
               </div>
             </div>

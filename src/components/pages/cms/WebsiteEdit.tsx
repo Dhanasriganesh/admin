@@ -977,42 +977,68 @@ const WebsiteEdit: React.FC = () => {
 
   // City selected → show the existing editor UI for that scope
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold text-gray-900">Website Editor · {cityName}</h1>
-          <p className="text-sm text-gray-600">Manage content and images for this location only</p>
-        </div>
-        <div className="flex items-center gap-2">
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="bg-white border-b-4 border-blue-600 rounded-lg shadow-sm p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Website Editor</h1>
+            <p className="text-sm text-gray-600 mt-1">
+              Editing content for: <span className="font-semibold text-blue-600">{cityName}</span>
+            </p>
+          </div>
           <button
             onClick={() => setCitySlug('')}
-            className="px-3 py-1.5 text-sm rounded-md border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-lg border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors"
           >
-            Change Location
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            <span>Change Location</span>
           </button>
-          
         </div>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-md text-sm">
-          {error}
+        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-md shadow-sm">
+          <div className="flex items-center">
+            <svg className="h-5 w-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+            <span className="font-medium">{error}</span>
+          </div>
         </div>
       )}
 
       {/* Header Section */}
       {isSectionVisible('header') && (
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-medium text-gray-900">Header Section</h2>
-          <button
-            onClick={() => saveSection('Header', { header })}
-            disabled={saving}
-            className="px-3 py-1.5 text-sm rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
-          >
-            {saving ? 'Saving...' : 'Save Header'}
-          </button>
+      <div className="bg-white border-2 border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        {/* Section Header */}
+        <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">1. Header Section</h2>
+                <p className="text-xs text-gray-500">Navigation menu and contact details</p>
+              </div>
+            </div>
+            <button
+              onClick={() => saveSection('Header', { header })}
+              disabled={saving}
+              className="px-4 py-2 text-sm font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 shadow-sm transition-colors"
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
         </div>
+        
+        {/* Section Content */}
+        <div className="p-6">
         <div className="space-y-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -1072,22 +1098,39 @@ const WebsiteEdit: React.FC = () => {
             />
           </div>
         </div>
-        </div>
+      </div>
+      </div>
       )}
 
       {/* Hero Section */}
       {isSectionVisible('hero') && (
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-medium text-gray-900">Hero Section</h2>
-          <button
-            onClick={() => saveSection('Hero', { hero })}
-            disabled={saving}
-            className="px-3 py-1.5 text-sm rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
-          >
-            {saving ? 'Saving...' : 'Save Hero'}
-          </button>
+      <div className="bg-white border-2 border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        {/* Section Header */}
+        <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">2. Hero Section</h2>
+                <p className="text-xs text-gray-500">Main banner with title, subtitle & background</p>
+              </div>
+            </div>
+            <button
+              onClick={() => saveSection('Hero', { hero })}
+              disabled={saving}
+              className="px-4 py-2 text-sm font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 shadow-sm transition-colors"
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
         </div>
+        
+        {/* Section Content */}
+        <div className="p-6">
         <div className="space-y-3">
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -1273,22 +1316,39 @@ const WebsiteEdit: React.FC = () => {
             />
           </div>
         </div>
+        </div>
       </div>
       )}
 
       {/* Trip Options Section */}
       {isSectionVisible('trip options') && (
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-medium text-gray-900">Trip Options Section</h2>
-          <button
-            onClick={() => saveSection('TripOptions', { tripOptions })}
-            disabled={saving}
-            className="px-3 py-1.5 text-sm rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
-          >
-            {saving ? 'Saving...' : 'Save Trip Options'}
-          </button>
+      <div className="bg-white border-2 border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        {/* Section Header */}
+        <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">3. Trip Options Section</h2>
+                <p className="text-xs text-gray-500">Custom & Group trip packages</p>
+              </div>
+            </div>
+            <button
+              onClick={() => saveSection('TripOptions', { tripOptions })}
+              disabled={saving}
+              className="px-4 py-2 text-sm font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 shadow-sm transition-colors"
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
         </div>
+        
+        {/* Section Content */}
+        <div className="p-6">
         <div className="space-y-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -1341,8 +1401,15 @@ const WebsiteEdit: React.FC = () => {
         </div>
 
         {/* Custom Trips Section */}
-        <div className="mt-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Custom Trips</h3>
+        <div className="mt-6 pt-6 border-t-2 border-gray-200">
+          <div className="flex items-center space-x-2 mb-4">
+            <div className="h-8 w-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <svg className="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            </div>
+            <h3 className="text-base font-bold text-gray-900">Custom Trips</h3>
+          </div>
           
           {/* Custom Trip Selector Dropdown */}
           <div className="mb-4">
@@ -1825,8 +1892,15 @@ const WebsiteEdit: React.FC = () => {
         </div>
 
         {/* Group Trips Section */}
-        <div className="mt-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Group Departures</h3>
+        <div className="mt-6 pt-6 border-t-2 border-gray-200">
+          <div className="flex items-center space-x-2 mb-4">
+            <div className="h-8 w-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <svg className="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <h3 className="text-base font-bold text-gray-900">Group Departures</h3>
+          </div>
           
           {/* Group Trip Selector Dropdown */}
           <div className="mb-4">
@@ -2307,22 +2381,39 @@ const WebsiteEdit: React.FC = () => {
             </div>
           )}
         </div>
+        </div>
       </div>
       )}
 
       {/* Reviews Section */}
       {isSectionVisible('reviews') && (
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-medium text-gray-900">Reviews Section</h2>
-          <button
-            onClick={() => saveSection('Reviews', { reviews })}
-            disabled={saving}
-            className="px-3 py-1.5 text-sm rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
-          >
-            {saving ? 'Saving...' : 'Save Reviews'}
-          </button>
+      <div className="bg-white border-2 border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        {/* Section Header */}
+        <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">4. Reviews Section</h2>
+                <p className="text-xs text-gray-500">Customer testimonials & feedback</p>
+              </div>
+            </div>
+            <button
+              onClick={() => saveSection('Reviews', { reviews })}
+              disabled={saving}
+              className="px-4 py-2 text-sm font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 shadow-sm transition-colors"
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
         </div>
+        
+        {/* Section Content */}
+        <div className="p-6">
         <div className="space-y-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -2507,21 +2598,38 @@ const WebsiteEdit: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
       )}
 
       {/* USP Section */}
       {isSectionVisible('usp') && (
-      <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">USP Section</h2>
-        <div className="flex justify-end mb-4">
-          <button
-            onClick={() => saveSection('USP', { usp })}
-            disabled={saving}
-            className="px-4 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400"
-          >
-            {saving ? 'Saving...' : 'Save USP'}
-          </button>
+      <div className="bg-white border-2 border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        {/* Section Header */}
+        <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">5. USP Section</h2>
+                <p className="text-xs text-gray-500">Unique selling points & features</p>
+              </div>
+            </div>
+            <button
+              onClick={() => saveSection('USP', { usp })}
+              disabled={saving}
+              className="px-4 py-2 text-sm font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 shadow-sm transition-colors"
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
         </div>
+        
+        {/* Section Content */}
+        <div className="p-6">
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -2625,22 +2733,39 @@ const WebsiteEdit: React.FC = () => {
             })()}
           </div>
         </div>
+        </div>
       </div>
       )}
 
       {/* Brands Section */}
       {isSectionVisible('brands') && (
-      <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Brands Section</h2>
-        <div className="flex justify-end mb-4">
-          <button
-            onClick={() => saveSection('Brands', { brands })}
-            disabled={saving}
-            className="px-4 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400"
-          >
-            {saving ? 'Saving...' : 'Save Brands'}
-          </button>
+      <div className="bg-white border-2 border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        {/* Section Header */}
+        <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">6. Brands Section</h2>
+                <p className="text-xs text-gray-500">Partner & client logos</p>
+              </div>
+            </div>
+            <button
+              onClick={() => saveSection('Brands', { brands })}
+              disabled={saving}
+              className="px-4 py-2 text-sm font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 shadow-sm transition-colors"
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
         </div>
+        
+        {/* Section Content */}
+        <div className="p-6">
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Heading</label>
@@ -2881,22 +3006,39 @@ const WebsiteEdit: React.FC = () => {
             )}
           </div>
         </div>
+        </div>
       </div>
       )}
 
       {/* FAQ Section */}
       {isSectionVisible('faq') && (
-        <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">FAQ Section</h2>
-        <div className="flex justify-end mb-4">
-          <button
-            onClick={() => saveSection('FAQ', { faq })}
-            disabled={saving}
-            className="px-4 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400"
-          >
-            {saving ? 'Saving...' : 'Save FAQ'}
-          </button>
+      <div className="bg-white border-2 border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        {/* Section Header */}
+        <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">7. FAQ Section</h2>
+                <p className="text-xs text-gray-500">Frequently asked questions</p>
+              </div>
+            </div>
+            <button
+              onClick={() => saveSection('FAQ', { faq })}
+              disabled={saving}
+              className="px-4 py-2 text-sm font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 shadow-sm transition-colors"
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
         </div>
+        
+        {/* Section Content */}
+        <div className="p-6">
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Heading</label>
@@ -2992,6 +3134,7 @@ const WebsiteEdit: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
       )}

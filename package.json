@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check-payment": "node scripts/check-razorpay-setup.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",

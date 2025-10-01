@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 interface StatItem {
@@ -10,43 +10,103 @@ interface StatItem {
   icon: string
 }
 
-interface ChartDataItem {
-  month?: string
-  city?: string
-  value: number
-  height: string
-}
-
 const AdminDashboard: React.FC = () => {
+  const [recentLeads, setRecentLeads] = useState<any[]>([])
+  const [upcomingBookings, setUpcomingBookings] = useState<any[]>([])
+  const [loadingLeads, setLoadingLeads] = useState(true)
+  const [loadingBookings, setLoadingBookings] = useState(true)
+
+  // Fetch recent leads
+  useEffect(() => {
+    const fetchRecentLeads = async () => {
+      try {
+        const response = await fetch('/api/leads')
+        const data = await response.json()
+        if (response.ok) {
+          // Get the 3 most recent leads
+          const sortedLeads = (data.leads || [])
+            .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+            .slice(0, 3)
+          setRecentLeads(sortedLeads)
+        }
+      } catch (error) {
+        console.error('Error fetching leads:', error)
+      } finally {
+        setLoadingLeads(false)
+      }
+    }
+    fetchRecentLeads()
+  }, [])
+
+  // Fetch upcoming bookings
+  useEffect(() => {
+    const fetchUpcomingBookings = async () => {
+      try {
+        const response = await fetch('/api/bookings?status=Confirmed')
+        const data = await response.json()
+        if (response.ok) {
+          // Get confirmed bookings sorted by travel date
+          const sortedBookings = (data.bookings || [])
+            .filter((b: any) => b.travel_date && new Date(b.travel_date) > new Date())
+            .sort((a: any, b: any) => new Date(a.travel_date).getTime() - new Date(b.travel_date).getTime())
+            .slice(0, 2)
+          setUpcomingBookings(sortedBookings)
+        }
+      } catch (error) {
+        console.error('Error fetching bookings:', error)
+      } finally {
+        setLoadingBookings(false)
+      }
+    }
+    fetchUpcomingBookings()
+  }, [])
+
   const stats: StatItem[] = [
-    { name: 'Total Leads', value: '1,000', change: '1.5% up from this week', changeType: 'increase', href: '/leads', icon: '👥' },
-    { name: 'Pending Approvals', value: '4,900', change: '1.3% up from past week', changeType: 'increase', href: '/approvals', icon: '✓' },
-    { name: 'Total Revenue', value: '₹87,000', change: '4.3% Down from this week', changeType: 'decrease', href: '/payments', icon: '📈' },
-    { name: 'Active Cities', value: '12', change: '1.8% up from this week', changeType: 'increase', href: '/reports', icon: '📁' },
+    { name: 'Total Leads', value: '0', change: '0% change from this week', changeType: 'increase', href: '/leads', icon: '👥' },
+    { name: 'Pending Approvals', value: '0', change: '0% change from past week', changeType: 'increase', href: '/approvals', icon: '✓' },
+    { name: 'Total Revenue', value: '₹0', change: '0% change from this week', changeType: 'increase', href: '/payments', icon: '📈' },
+    { name: 'Active Cities', value: '0', change: '0% change from this week', changeType: 'increase', href: '/reports', icon: '📁' },
   ]
 
-  const revenueData: ChartDataItem[] = [
-    { month: 'Jan', value: 25, height: 'h-16' },
-    { month: 'Feb', value: 35, height: 'h-20' },
-    { month: 'Mar', value: 30, height: 'h-18' },
-    { month: 'Apr', value: 45, height: 'h-24' },
-    { month: 'May', value: 40, height: 'h-22' },
-    { month: 'Jun', value: 50, height: 'h-28' },
-    { month: 'Jul', value: 87, height: 'h-32' },
-    { month: 'Aug', value: 65, height: 'h-26' },
-    { month: 'Sep', value: 55, height: 'h-24' },
-    { month: 'Oct', value: 70, height: 'h-28' },
-    { month: 'Nov', value: 60, height: 'h-25' },
-    { month: 'Dec', value: 75, height: 'h-30' }
-  ]
-
-  const cityData: ChartDataItem[] = [
-    { city: 'Bangalore', value: 45, height: 'h-28' },
-    { city: 'Delhi', value: 35, height: 'h-22' },
-    { city: 'Vizag', value: 25, height: 'h-16' },
-    { city: 'Chennai', value: 30, height: 'h-18' },
-    { city: 'Hyderabad', value: 20, height: 'h-12' },
-    { city: 'Pune', value: 15, height: 'h-10' }
+  // Quick Actions
+  const quickActions = [
+    {
+      name: 'New Itinerary',
+      icon: (
+        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      ),
+      href: '/packages'
+    },
+    {
+      name: 'Add Lead',
+      icon: (
+        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      ),
+      href: '/leads'
+    },
+    {
+      name: 'Payment Link',
+      icon: (
+        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+      href: '/payments'
+    },
+    {
+      name: 'View Reports',
+      icon: (
+        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        </svg>
+      ),
+      href: '/reports'
+    }
   ]
 
   return (
@@ -83,100 +143,186 @@ const AdminDashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* Revenue Trends Chart */}
+      {/* Recent Leads and Upcoming Bookings Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Recent Leads */}
         <div className="bg-white shadow rounded-lg">
-          <div className="px-4 py-3 border-b border-gray-200">
-            <h3 className="text-base font-medium text-gray-900">Revenue Trends</h3>
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-xl font-bold text-gray-900">Recent Leads</h3>
+            <p className="text-sm text-gray-600">Latest inquiries from potential customers</p>
           </div>
-          <div className="p-4">
-            <div className="h-56 flex items-end justify-between space-x-1.5">
-              {revenueData.map((item, index) => (
-                <div key={index} className="flex flex-col items-center">
-                  <div className={`w-5 bg-primary rounded-t ${item.height} mb-2`}></div>
-                  <span className="text-xs text-gray-500">{item.month}</span>
+          <div className="p-6">
+            {loadingLeads ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="text-sm text-gray-500 mt-2">Loading leads...</p>
+              </div>
+            ) : recentLeads.length === 0 ? (
+              <div className="text-center py-8">
+                <svg className="mx-auto h-12 w-12 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <p className="text-sm text-gray-500">No recent leads</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {recentLeads.map((lead) => (
+                  <div key={lead.id} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="text-sm font-semibold text-gray-900">{lead.name || 'Unknown'}</h4>
+                          {lead.email && (
+                            <p className="text-xs text-gray-600 flex items-center mt-1">
+                              <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                              </svg>
+                              {lead.email}
+                            </p>
+                          )}
+                          {lead.phone && (
+                            <p className="text-xs text-gray-600 flex items-center mt-1">
+                              <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                              </svg>
+                              {lead.phone}
+                            </p>
+                          )}
+                          <div className="flex items-center space-x-3 mt-2 text-xs text-gray-500">
+                            {lead.source && <span>{lead.source}</span>}
+                            {lead.destination && (
+                              <>
+                                <span>•</span>
+                                <span>{lead.destination}</span>
+                              </>
+                            )}
+                            {lead.created_at && (
+                              <>
+                                <span>•</span>
+                                <span>{new Date(lead.created_at).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })} {Math.floor((Date.now() - new Date(lead.created_at).getTime()) / 3600000)} hours ago</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-4">
+                          {lead.status && (
+                            <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                              {lead.status}
+                            </span>
+                          )}
+                          <Link
+                            to={`/leads`}
+                            className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                          >
+                            View
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
                 </div>
               ))}
             </div>
-            <div className="mt-3 text-center">
-              <p className="text-xs text-gray-600">Revenue in ₹ (Thousands)</p>
-            </div>
+            )}
           </div>
         </div>
 
-        {/* City-wise Contributions Chart */}
+        {/* Upcoming Bookings */}
         <div className="bg-white shadow rounded-lg">
-          <div className="px-4 py-3 border-b border-gray-200">
-            <h3 className="text-base font-medium text-gray-900">City-wise Contributions</h3>
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-xl font-bold text-gray-900">Upcoming Bookings</h3>
+            <p className="text-sm text-gray-600">Confirmed trips starting soon</p>
           </div>
-          <div className="p-4">
-            <div className="h-56 flex items-end justify-between space-x-1.5">
-              {cityData.map((item, index) => (
-                <div key={index} className="flex flex-col items-center flex-1">
-                  <div className={`w-full bg-primary rounded-t ${item.height} mb-2`}></div>
-                  <span className="text-[11px] text-gray-500 text-center">{item.city}</span>
+          <div className="p-6">
+            {loadingBookings ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="text-sm text-gray-500 mt-2">Loading bookings...</p>
+              </div>
+            ) : upcomingBookings.length === 0 ? (
+              <div className="text-center py-8">
+                <svg className="mx-auto h-12 w-12 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p className="text-sm text-gray-500">No upcoming bookings</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {upcomingBookings.map((booking) => (
+                  <div key={booking.id} className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div className="flex items-start space-x-4">
+                      <div className="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h4 className="text-sm font-semibold text-gray-900">{booking.customer || booking.package_name}</h4>
+                            <p className="text-sm text-gray-600">{booking.destination}</p>
+                            {booking.travel_date && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                Start: {new Date(booking.travel_date).toISOString().split('T')[0]} • {booking.travelers || 1} guests
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex items-center space-x-2 ml-4">
+                            <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                              confirmed
+                            </span>
+                            <Link
+                              to="/bookings"
+                              className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                            >
+                              View
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                 </div>
               ))}
+                <Link
+                  to="/bookings"
+                  className="block text-center py-3 text-sm font-medium text-gray-700 hover:text-blue-600 border-t border-gray-200"
+                >
+                  View All Bookings
+                </Link>
             </div>
-            <div className="mt-3 text-center">
-              <p className="text-xs text-gray-600">Contributions in ₹ (Thousands)</p>
-            </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Pending Approvals */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-3 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-medium text-gray-900">Pending Approvals</h3>
-            <button className="text-xs text-primary hover:opacity-80">View all</button>
-          </div>
+      {/* Quick Actions Section */}
+      <div className="bg-white shadow rounded-lg p-6">
+        <div className="mb-4">
+          <h3 className="text-xl font-bold text-gray-900">Quick Actions</h3>
+          <p className="text-sm text-gray-600">Common tasks and shortcuts</p>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-2 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                <th className="px-4 py-2 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wider">Name/ID</th>
-                <th className="px-4 py-2 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wider">City/Division</th>
-                <th className="px-4 py-2 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wider">Date Submitted</th>
-                <th className="px-4 py-2 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wider">Action</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              <tr>
-                <td className="px-4 py-3 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div className="w-2.5 h-2.5 bg-primary rounded-full mr-2"></div>
-                    <span className="text-xs text-gray-900">Volunteer</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {quickActions.map((action) => (
+            <Link
+              key={action.name}
+              to={action.href}
+              className="flex flex-col items-center justify-center p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all duration-200 group"
+            >
+              <div className="text-gray-700 group-hover:text-blue-600 transition-colors mb-3">
+                {action.icon}
                   </div>
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap">
-                  <div className="text-xs text-gray-900">Rajesh Shah - SCI02467</div>
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap">
-                  <div className="text-xs text-gray-900">Hyderabad - Engineering Unit</div>
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap">
-                  <div className="text-xs text-gray-900">02 August 2025</div>
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap">
-                  <div className="flex space-x-2">
-                    <button className="bg-primary text-white px-2.5 py-1 rounded text-xs hover:opacity-90">
-                      Approve
-                    </button>
-                    <button className="bg-red-500 text-white px-2.5 py-1 rounded text-xs hover:bg-red-600">
-                      Reject
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+              <span className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                {action.name}
+              </span>
+            </Link>
+          ))}
         </div>
       </div>
+
     </div>
   )
 }

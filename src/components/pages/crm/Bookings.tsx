@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 interface Booking {
   id: number
@@ -6,90 +6,79 @@ interface Booking {
   email: string
   phone: string
   package: string
+  package_name?: string
   destination: string
   duration: string
   travelers: number
   amount: number
   status: 'Confirmed' | 'Pending' | 'Cancelled' | 'Completed'
   bookingDate: string
+  booking_date?: string
   travelDate: string
+  travel_date?: string
   paymentStatus: 'Paid' | 'Partial' | 'Pending' | 'Refunded'
+  payment_status?: string
   assignedAgent: string
+  assigned_agent?: string
+  lead_id?: string
+  itinerary_details?: any
+  razorpay_payment_link?: string
 }
 
 type FilterType = 'all' | 'confirmed' | 'pending' | 'cancelled'
 
 const Bookings: React.FC = () => {
-  const [bookings, setBookings] = useState<Booking[]>([
-    {
-      id: 1,
-      customer: 'Sarah Wilson',
-      email: 'sarah@example.com',
-      phone: '+1-555-0123',
-      package: 'Bali Adventure',
-      destination: 'Bali, Indonesia',
-      duration: '7 days',
-      travelers: 2,
-      amount: 2500,
-      status: 'Confirmed',
-      bookingDate: '2024-01-15',
-      travelDate: '2024-03-15',
-      paymentStatus: 'Paid',
-      assignedAgent: 'Mike Johnson'
-    },
-    {
-      id: 2,
-      customer: 'David Brown',
-      email: 'david@example.com',
-      phone: '+1-555-0124',
-      package: 'European Tour',
-      destination: 'Paris, Rome, Barcelona',
-      duration: '10 days',
-      travelers: 4,
-      amount: 4200,
-      status: 'Pending',
-      bookingDate: '2024-01-14',
-      travelDate: '2024-04-20',
-      paymentStatus: 'Partial',
-      assignedAgent: 'Sarah Wilson'
-    },
-    {
-      id: 3,
-      customer: 'Lisa Garcia',
-      email: 'lisa@example.com',
-      phone: '+1-555-0125',
-      package: 'Thailand Discovery',
-      destination: 'Bangkok, Chiang Mai',
-      duration: '8 days',
-      travelers: 2,
-      amount: 1800,
-      status: 'Confirmed',
-      bookingDate: '2024-01-13',
-      travelDate: '2024-02-28',
-      paymentStatus: 'Paid',
-      assignedAgent: 'Mike Johnson'
-    },
-    {
-      id: 4,
-      customer: 'John Doe',
-      email: 'john@example.com',
-      phone: '+1-555-0126',
-      package: 'Japan Experience',
-      destination: 'Tokyo, Kyoto, Osaka',
-      duration: '12 days',
-      travelers: 1,
-      amount: 3200,
-      status: 'Cancelled',
-      bookingDate: '2024-01-12',
-      travelDate: '2024-05-10',
-      paymentStatus: 'Refunded',
-      assignedAgent: 'Sarah Wilson'
-    }
-  ])
-
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
   const [showModal, setShowModal] = useState<boolean>(false)
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
   const [filter, setFilter] = useState<FilterType>('all')
+
+  // Fetch bookings from API
+  useEffect(() => {
+    fetchBookings()
+  }, [])
+
+  const fetchBookings = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/bookings')
+      const data = await response.json()
+      
+      if (response.ok) {
+        // Normalize the booking data
+        const normalizedBookings = (data.bookings || []).map((booking: any) => ({
+          id: booking.id,
+          customer: booking.customer,
+          email: booking.email,
+          phone: booking.phone || '',
+          package: booking.package_name || booking.package || 'N/A',
+          destination: booking.destination,
+          duration: booking.duration || 'N/A',
+          travelers: booking.travelers || 1,
+          amount: parseFloat(booking.amount) || 0,
+          status: booking.status || 'Pending',
+          bookingDate: booking.booking_date || booking.bookingDate || new Date().toISOString().split('T')[0],
+          travelDate: booking.travel_date || booking.travelDate || '',
+          paymentStatus: booking.payment_status || booking.paymentStatus || 'Pending',
+          assignedAgent: booking.assigned_agent || booking.assignedAgent || 'Unassigned',
+          lead_id: booking.lead_id,
+          itinerary_details: booking.itinerary_details,
+          razorpay_payment_link: booking.razorpay_payment_link
+        }))
+        setBookings(normalizedBookings)
+        setError(null)
+      } else {
+        setError(data.error || 'Failed to load bookings')
+      }
+    } catch (err: any) {
+      console.error('Error fetching bookings:', err)
+      setError('Failed to load bookings')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const filteredBookings = bookings.filter(booking => {
     if (filter === 'all') return true
@@ -116,10 +105,26 @@ const Bookings: React.FC = () => {
     }
   }
 
-  const handleStatusUpdate = (bookingId: number, newStatus: Booking['status']): void => {
-    setBookings(bookings.map(booking => 
-      booking.id === bookingId ? { ...booking, status: newStatus } : booking
-    ))
+  const handleStatusUpdate = async (bookingId: number, newStatus: Booking['status']): Promise<void> => {
+    try {
+      const response = await fetch('/api/bookings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: bookingId, status: newStatus })
+      })
+      
+      if (response.ok) {
+        setBookings(bookings.map(booking => 
+          booking.id === bookingId ? { ...booking, status: newStatus } : booking
+        ))
+      } else {
+        const data = await response.json()
+        alert('Failed to update booking: ' + (data.error || 'Unknown error'))
+      }
+    } catch (error: any) {
+      console.error('Error updating booking:', error)
+      alert('Failed to update booking status')
+    }
   }
 
   const openBookingDetails = (booking: Booking): void => {
@@ -257,10 +262,35 @@ const Bookings: React.FC = () => {
         </div>
       </div>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="bg-white shadow rounded-lg p-8 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading bookings...</p>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !loading && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">{error}</p>
+          <button onClick={fetchBookings} className="mt-2 text-red-600 hover:text-red-800 text-sm font-medium">
+            Try Again
+          </button>
+        </div>
+      )}
+
       {/* Bookings Table */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
-        <ul className="divide-y divide-gray-200">
-          {filteredBookings.map((booking) => (
+      {!loading && !error && (
+        <div className="bg-white shadow overflow-hidden sm:rounded-md">
+          {filteredBookings.length === 0 ? (
+            <div className="p-8 text-center text-gray-500">
+              <p className="text-lg font-medium mb-2">No bookings found</p>
+              <p className="text-sm">Bookings will appear here once customers make payments.</p>
+            </div>
+          ) : (
+            <ul className="divide-y divide-gray-200">
+              {filteredBookings.map((booking) => (
             <li key={booking.id}>
               <div className="px-4 py-4 sm:px-6 hover:bg-gray-50">
                 <div className="flex items-center justify-between">
@@ -307,9 +337,11 @@ const Bookings: React.FC = () => {
                 </div>
               </div>
             </li>
-          ))}
-        </ul>
-      </div>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {/* Booking Details Modal */}
       {showModal && selectedBooking && (

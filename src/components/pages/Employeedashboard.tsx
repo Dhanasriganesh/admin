@@ -61,6 +61,7 @@ const Employeedashboard: React.FC = () => {
   const [leadItinerariesLoading, setLeadItinerariesLoading] = useState<boolean>(false)
   const [leadItinerariesError, setLeadItinerariesError] = useState<string | null>(null)
   const [selectedLead, setSelectedLead] = useState<any>(null)
+  const [leadBookingStatus, setLeadBookingStatus] = useState<Record<string, any>>({})
   
   // Helper to normalize city name to slug (e.g., "Ladakh" -> "ladakh")
   const toSlug = (value: string): string => {
@@ -200,6 +201,96 @@ const Employeedashboard: React.FC = () => {
     if (packages.length && employeeDestination) loadPlansForLocations()
   }, [packages, employeeDestination, fixedPlansByLocation])
 
+  // Load booking status for all assigned leads
+  useEffect(() => {
+    const loadBookingStatuses = async () => {
+      if (assignedLeads.length === 0) return
+      
+      try {
+        const statusMap: Record<string, any> = {}
+        
+        await Promise.all(assignedLeads.map(async (lead) => {
+          try {
+            const res = await fetch(`/api/bookings?leadId=${lead.id}`)
+            const data = await res.json()
+            if (res.ok && data.bookings && data.bookings.length > 0) {
+              // Get the most recent booking for this lead
+              const latestBooking = data.bookings[0]
+              statusMap[lead.id] = {
+                hasBooking: true,
+                bookingId: latestBooking.id,
+                status: latestBooking.status,
+                paymentStatus: latestBooking.payment_status,
+                amount: latestBooking.amount,
+                razorpayOrderId: latestBooking.razorpay_order_id
+              }
+            }
+          } catch (_) {
+            // Ignore errors for individual leads
+          }
+        }))
+        
+        setLeadBookingStatus(statusMap)
+      } catch (error) {
+        console.error('Error loading booking statuses:', error)
+      }
+    }
+    
+    loadBookingStatuses()
+  }, [assignedLeads])
+
+  // Refresh payment status for a specific lead
+  const refreshPaymentStatus = async (leadId: string) => {
+    const bookingStatus = leadBookingStatus[leadId]
+    if (!bookingStatus?.bookingId) {
+      alert('No booking found for this lead')
+      return
+    }
+    
+    try {
+      console.log('Checking payment status for booking:', bookingStatus.bookingId)
+      
+      // Check payment status with Razorpay
+      const checkRes = await fetch('/api/bookings/check-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookingId: bookingStatus.bookingId
+        })
+      })
+      
+      const checkData = await checkRes.json()
+      console.log('Payment check response:', checkData)
+      
+      // Check the status returned from Razorpay
+      if (checkData.status === 'paid') {
+        // Payment is confirmed - update the local status
+        setLeadBookingStatus(prev => ({
+          ...prev,
+          [leadId]: {
+            ...prev[leadId],
+            status: 'Confirmed',
+            paymentStatus: 'Paid'
+          }
+        }))
+        alert('✅ Payment Confirmed!\n\nThe customer has completed the payment.\nBooking status updated to Confirmed.')
+      } else if (checkData.status === 'created' || checkData.status === 'issued') {
+        // Payment link exists but not paid yet
+        alert(`⏳ Payment Status: Pending\n\nThe customer has not completed the payment yet.\n\nRazorpay Status: ${checkData.status}`)
+      } else if (checkData.error) {
+        // Error from API
+        console.error('Check payment error:', checkData.error)
+        alert('❌ Error checking payment status:\n\n' + checkData.error)
+      } else {
+        // Other status
+        alert(`Payment Status: ${checkData.status || 'Unknown'}\n\nPlease check Razorpay dashboard for details.`)
+      }
+    } catch (error: any) {
+      console.error('Error checking payment status:', error)
+      alert('❌ Failed to check payment status:\n\n' + error.message)
+    }
+  }
+
   const handleLogout = () => {
     logout()
     window.location.href = '/login'
@@ -253,9 +344,158 @@ const Employeedashboard: React.FC = () => {
   }
 
   // Generate and send payment link function
-  const generatePaymentLink = () => {
-    // Here you can implement the payment link generation logic
-    alert('Payment link generated and sent to the member!')
+  const generatePaymentLink = async () => {
+    if (!selectedLead || !selectedItinerary) {
+      alert('Missing lead or itinerary information')
+      return
+    }
+
+    try {
+      // Calculate amount (map_rate + eb from hotel if available)
+      let amount = 0
+      const hotel = selectedItinerary.selected_hotel_id 
+        ? hotels.find(h => h.id === selectedItinerary.selected_hotel_id)
+        : null
+      
+      if (hotel) {
+        amount = (hotel.map_rate || 0) + (hotel.eb || 0)
+      } else if (selectedItinerary.fixed_price_per_person && selectedItinerary.fixed_adults) {
+        amount = selectedItinerary.fixed_price_per_person * selectedItinerary.fixed_adults
+      } else {
+        amount = selectedItinerary.price || 0
+      }
+
+      if (amount === 0) {
+        alert('Please set a valid amount for this itinerary')
+        return
+      }
+
+      // Step 1: Create Razorpay payment link
+      console.log('Creating payment link...')
+      const paymentLinkRes = await fetch('/api/razorpay/create-payment-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount,
+          customer_name: selectedLead.name,
+          customer_email: selectedLead.email,
+          customer_phone: selectedLead.phone,
+          description: `Payment for ${selectedItinerary.destination} travel package`,
+          booking_id: selectedLead.id
+        })
+      })
+
+      const paymentLinkData = await paymentLinkRes.json()
+      
+      if (!paymentLinkRes.ok) {
+        throw new Error(paymentLinkData.error || 'Failed to create payment link')
+      }
+
+      console.log('Payment link created:', paymentLinkData.payment_link)
+
+      // Step 2: Create booking in database
+      console.log('Creating booking...')
+      console.log('Lead ID:', selectedLead.id, 'Type:', typeof selectedLead.id)
+      console.log('Package ID:', selectedItinerary.id, 'Type:', typeof selectedItinerary.id)
+      
+      const bookingRes = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lead_id: String(selectedLead.id), // Ensure it's a string
+          customer: selectedLead.name,
+          email: selectedLead.email,
+          phone: selectedLead.phone,
+          package_id: selectedItinerary.id ? parseInt(selectedItinerary.id) : null, // Ensure it's a number or null
+          package_name: selectedItinerary.name,
+          destination: selectedItinerary.destination || selectedLead.destination,
+          travelers: parseInt(selectedLead.number_of_travelers) || 1,
+          amount,
+          travel_date: selectedLead.travel_dates,
+          assigned_agent: user?.name || 'Unassigned',
+          itinerary_details: selectedItinerary,
+          razorpay_order_id: paymentLinkData.payment_link_id || paymentLinkData.order_id, // Store payment link ID
+          razorpay_payment_link: paymentLinkData.payment_link
+        })
+      })
+      
+      console.log('Booking payload - razorpay_order_id:', paymentLinkData.payment_link_id || paymentLinkData.order_id)
+
+      const bookingData = await bookingRes.json()
+      
+      if (!bookingRes.ok) {
+        throw new Error(bookingData.error || 'Failed to create booking')
+      }
+
+      console.log('Booking created:', bookingData.booking)
+
+      // Step 3: Send email with payment link
+      console.log('Sending email...')
+      const vehicle = selectedItinerary.selected_vehicle_id
+        ? vehicles.find(v => v.id === selectedItinerary.selected_vehicle_id)
+        : null
+
+      const emailRes = await fetch('/api/email/send-payment-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          member: {
+            name: selectedLead.name,
+            email: selectedLead.email,
+            phone: selectedLead.phone,
+            leadId: selectedLead.id,
+            destination: selectedLead.destination,
+            travelDate: selectedLead.travel_dates,
+            travelers: selectedLead.number_of_travelers,
+            notes: selectedLead.custom_notes
+          },
+          itinerary: {
+            name: selectedItinerary.name,
+            destination: selectedItinerary.destination,
+            planType: selectedItinerary.plan_type,
+            serviceType: selectedItinerary.service_type,
+            hotel: hotel ? {
+              name: hotel.name,
+              mapRate: hotel.map_rate || 0,
+              eb: hotel.eb || 0,
+              category: hotel.category || 'N/A'
+            } : undefined,
+            vehicle: vehicle ? {
+              type: vehicle.vehicle_type,
+              rate: (vehicle as any).rate || 0,
+              acExtra: (vehicle as any).ac_extra || 0
+            } : undefined,
+            fixedPlan: selectedItinerary.fixed_days_id ? {
+              days: fixedDaysOptions.find(d => d.id === selectedItinerary.fixed_days_id)?.days || 0,
+              adults: selectedItinerary.fixed_adults || 0,
+              pricePerPerson: selectedItinerary.fixed_price_per_person || 0
+            } : undefined
+          },
+          payment: {
+            amount,
+            paymentLink: paymentLinkData.payment_link
+          }
+        })
+      })
+
+      const emailData = await emailRes.json()
+      
+      if (!emailRes.ok) {
+        console.error('Email sending failed:', emailData.error)
+        alert(`Booking created but email failed to send. Please contact the customer directly.\n\nPayment link: ${paymentLinkData.payment_link}`)
+      } else {
+        alert('✅ Payment link generated and sent successfully!\n\nThe customer will receive an email with all details and the payment link.\n\nBooking ID: #' + bookingData.booking.id)
+      }
+
+      // Close the payment page and refresh leads
+      setShowPaymentPage(false)
+      setSelectedLeadId(null)
+      setSelectedItinerary(null)
+      
+    } catch (error: any) {
+      console.error('Error generating payment link:', error)
+      alert('Failed to generate payment link: ' + error.message)
+    }
   }
 
   return (
@@ -1128,21 +1368,72 @@ const Employeedashboard: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                       {assignedLeads.map((lead) => {
                         const isExpanded = expandedLeads.has(lead.id)
+                        const bookingStatus = leadBookingStatus[lead.id]
+                        const hasPayment = bookingStatus?.hasBooking
+                        const isPaymentConfirmed = bookingStatus?.status === 'Confirmed' && bookingStatus?.paymentStatus === 'Paid'
+                        const isPending = bookingStatus?.status === 'Pending'
+                        
                         return (
                           <div
                             key={lead.id}
-                            className="group bg-white border border-gray-200 rounded-lg hover:shadow-md hover:border-primary transition-all duration-200 overflow-hidden cursor-pointer"
+                            className={`group bg-white border-2 rounded-lg hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer ${
+                              isPaymentConfirmed 
+                                ? 'border-green-300 bg-green-50/30' 
+                                : isPending 
+                                  ? 'border-yellow-300 bg-yellow-50/30'
+                                  : 'border-gray-200 hover:border-primary'
+                            }`}
                             onClick={() => {
                               setSelectedLeadId(lead.id.toString())
                               loadLeadItineraries(lead.id.toString())
                             }}
                           >
+                            {/* Payment Status Banner */}
+                            {hasPayment && (
+                              <div className={`px-3 py-1.5 text-xs font-medium flex items-center justify-between ${
+                                isPaymentConfirmed 
+                                  ? 'bg-green-100 text-green-800 border-b border-green-200' 
+                                  : 'bg-yellow-100 text-yellow-800 border-b border-yellow-200'
+                              }`}>
+                                <div className="flex items-center space-x-1.5">
+                                  {isPaymentConfirmed ? (
+                                    <>
+                                      <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                      </svg>
+                                      <span>Payment Confirmed</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <svg className="h-3.5 w-3.5 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                                      </svg>
+                                      <span>Payment Pending</span>
+                                    </>
+                                  )}
+                                </div>
+                                <span className="font-semibold">₹{bookingStatus.amount}</span>
+                              </div>
+                            )}
+                            
                             {/* Card Header */}
                             <div className="p-3 pb-2">
                               <div className="flex items-start justify-between mb-2">
                                 <div className="flex items-center space-x-2">
-                                  <div className="h-8 w-8 bg-primary/20 rounded-full flex items-center justify-center">
-                                    <span className="text-primary font-semibold text-xs">
+                                  <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
+                                    isPaymentConfirmed 
+                                      ? 'bg-green-200' 
+                                      : isPending 
+                                        ? 'bg-yellow-200'
+                                        : 'bg-primary/20'
+                                  }`}>
+                                    <span className={`font-semibold text-xs ${
+                                      isPaymentConfirmed 
+                                        ? 'text-green-700' 
+                                        : isPending 
+                                          ? 'text-yellow-700'
+                                          : 'text-primary'
+                                    }`}>
                                       {(lead.name || 'Lead').charAt(0).toUpperCase()}
                                     </span>
                                   </div>
@@ -1161,10 +1452,12 @@ const Employeedashboard: React.FC = () => {
                                     )}
                                   </div>
                                 </div>
-                                <div className="flex items-center space-x-1">
-                                  <div className="h-2 w-2 bg-primary rounded-full"></div>
-                                  <span className="text-xs text-gray-500">New</span>
-                                </div>
+                                {!hasPayment && (
+                                  <div className="flex items-center space-x-1">
+                                    <div className="h-2 w-2 bg-primary rounded-full"></div>
+                                    <span className="text-xs text-gray-500">New</span>
+                                  </div>
+                                )}
                               </div>
                             </div>
                             
@@ -1241,9 +1534,26 @@ const Employeedashboard: React.FC = () => {
                             {/* Card Footer */}
                             <div className="px-3 py-2 bg-gray-50 border-t border-gray-100">
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-1">
-                                  <div className="h-2 w-2 bg-primary rounded-full"></div>
-                                  <span className="text-xs text-gray-600">Active Lead</span>
+                                <div className="flex items-center space-x-2">
+                                  {isPending ? (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        refreshPaymentStatus(lead.id)
+                                      }}
+                                      className="flex items-center space-x-1 px-2 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 rounded text-xs font-medium transition-colors"
+                                    >
+                                      <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                      </svg>
+                                      <span>Check Payment</span>
+                                    </button>
+                                  ) : (
+                                    <div className="flex items-center space-x-1">
+                                      <div className="h-2 w-2 bg-primary rounded-full"></div>
+                                      <span className="text-xs text-gray-600">Active Lead</span>
+                                    </div>
+                                  )}
                                 </div>
                             <button 
                               onClick={(e) => {
