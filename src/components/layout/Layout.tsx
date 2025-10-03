@@ -42,7 +42,6 @@ const navigationSections: NavigationSection[] = [
     ]
   },
   {
-    title: 'CRM',
     items: [
       { name: 'Leads', href: '/leads', icon: UserGroupIcon },
       { name: 'Bookings', href: '/bookings', icon: ClipboardDocumentListIcon },
@@ -51,7 +50,6 @@ const navigationSections: NavigationSection[] = [
     ]
   },
   {
-    title: 'CMS',
     items: [
       { name: 'Website Edit', href: '/website-edit', icon: DocumentTextIcon },
       { name: 'Itinarary Builder', href: '/packages', icon: ClipboardDocumentListIcon },

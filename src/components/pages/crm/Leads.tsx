@@ -39,6 +39,7 @@ const Leads: React.FC = () => {
   const [employees, setEmployees] = useState<Array<{ id: string; name: string; email: string }>>([])
   const [loadingEmployees, setLoadingEmployees] = useState<boolean>(false)
   const [searchTerm, setSearchTerm] = useState<string>('')
+  const [assigning, setAssigning] = useState<boolean>(false)
 
   // Create lead modal state
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false)
@@ -195,6 +196,7 @@ const Leads: React.FC = () => {
   const handleAssignLead = async (employeeId: string, employeeName: string, employeeEmail: string) => {
     if (!assigningLead) return
     
+    setAssigning(true)
     try {
       const res = await fetch('/api/leads/assign', {
         method: 'POST',
@@ -228,7 +230,7 @@ const Leads: React.FC = () => {
           assigned_employee_email: employeeEmail
         } : null)
         
-        alert(`Assigned lead to ${employeeName}`)
+        alert(`Successfully assigned lead to ${employeeName}. An email with guide details has been sent to ${assigningLead.email}.`)
       } else {
         const err = await res.json().catch(() => ({}))
         alert(err.error || 'Failed to assign lead')
@@ -236,6 +238,8 @@ const Leads: React.FC = () => {
     } catch (error) {
       console.error('Error assigning lead:', error)
       alert('Failed to assign lead')
+    } finally {
+      setAssigning(false)
     }
   }
 
@@ -1049,9 +1053,17 @@ const Leads: React.FC = () => {
                               ) : (
                                 <button
                                   onClick={() => handleAssignLead(emp.id, emp.name, emp.email)}
-                                  className="px-2 py-1 bg-primary hover:opacity-90 text-white rounded text-xs font-medium transition-all duration-200"
+                                  disabled={assigning}
+                                  className="px-2 py-1 bg-primary hover:opacity-90 text-white rounded text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
                                 >
-                                  Assign
+                                  {assigning ? (
+                                    <>
+                                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                                      <span>Assigning...</span>
+                                    </>
+                                  ) : (
+                                    <span>Assign</span>
+                                  )}
                                 </button>
                               )}
                             </div>
