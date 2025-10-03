@@ -122,7 +122,7 @@ const Reports: React.FC = () => {
           break
 
         case 'payments':
-          headers = ['ID', 'Customer', 'Package', 'Amount', 'Payment Status', 'Payment Method', 'Payment Date', 'Due Date', 'Transaction ID']
+          headers = ['ID', 'Customer', 'Package', 'Amount', 'Payment Status', 'Payment Method', 'Payment Date', 'Due Date', 'Transaction ID', 'Assigned Employee', 'Employee Mobile']
           excelData = reportData.map((payment: any) => [
             payment.id,
             payment.customer || 'N/A',
@@ -132,7 +132,9 @@ const Reports: React.FC = () => {
             payment.payment_method || payment.paymentMethod || 'N/A',
             payment.payment_date || payment.paymentDate || 'N/A',
             payment.due_date || payment.dueDate || 'N/A',
-            payment.transaction_id || payment.transactionId || 'N/A'
+            payment.transaction_id || payment.transactionId || 'N/A',
+            payment.assigned_employee_name || payment.assignedEmployeeName || 'N/A',
+            payment.assigned_employee_mobile || payment.assignedEmployeeMobile || 'N/A'
           ])
           break
 
@@ -311,7 +313,7 @@ const Reports: React.FC = () => {
               <span className="font-medium">Report Summary:</span> {selectedSection.toUpperCase()} data for {selectedLocation === 'all' ? 'All Locations' : selectedLocation} 
               {selectedMonth !== 'all' && ` in ${new Date(0, parseInt(selectedMonth) - 1).toLocaleString('default', { month: 'long' })}`}
               {selectedYear !== 'all' && ` ${selectedYear}`}
-            </div>
+                </div>
             <div className="text-sm font-medium text-gray-900">
               {loading ? 'Loading...' : `${reportData.length} records found`}
             </div>
@@ -352,6 +354,8 @@ const Reports: React.FC = () => {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Employee</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee Mobile</th>
                     </>
                   )}
                   {selectedSection === 'bookings' && (
@@ -386,6 +390,8 @@ const Reports: React.FC = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.payment_status || item.paymentStatus || 'N/A'}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.payment_method || item.paymentMethod || 'N/A'}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{new Date(item.payment_date || item.paymentDate || item.created_at).toLocaleDateString()}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.assigned_employee_name || item.assignedEmployeeName || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.assigned_employee_mobile || item.assignedEmployeeMobile || 'N/A'}</td>
                       </>
                     )}
                     {selectedSection === 'bookings' && (

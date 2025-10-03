@@ -30,8 +30,38 @@ export async function GET(request: NextRequest) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
+
+    // Get all unique assigned agent names
+    const assignedAgents = [...new Set((data || []).map(booking => booking.assigned_agent).filter(Boolean))]
+    console.log('Assigned agents found:', assignedAgents)
     
-    return NextResponse.json({ bookings: data || [] })
+    // Fetch employee data for assigned agents
+    let employeeData: any[] = []
+    if (assignedAgents.length > 0) {
+      const { data: employees, error: empError } = await supabase
+        .from('employees')
+        .select('name, phone')
+        .in('name', assignedAgents)
+      
+      if (!empError && employees) {
+        employeeData = employees
+        console.log('Employee data fetched:', employees)
+      } else {
+        console.log('Error fetching employees:', empError)
+      }
+    }
+
+    // Merge employee data with booking data
+    const enrichedBookings = (data || []).map(booking => {
+      const employee = employeeData.find(emp => emp.name === booking.assigned_agent)
+      return {
+        ...booking,
+        assigned_employee_name: employee?.name || booking.assigned_agent || 'N/A',
+        assigned_employee_mobile: employee?.phone || 'N/A'
+      }
+    })
+    
+    return NextResponse.json({ bookings: enrichedBookings })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
@@ -129,6 +159,31 @@ export async function PATCH(request: NextRequest) {
     }
     
     return NextResponse.json({ booking: data })
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}
+
+// DELETE - Delete a booking/payment record
+export async function DELETE(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { id } = body
+    
+    if (!id) {
+      return NextResponse.json({ error: 'Booking ID required' }, { status: 400 })
+    }
+    
+    const { error } = await supabase
+      .from('bookings')
+      .delete()
+      .eq('id', id)
+    
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 })
+    }
+    
+    return NextResponse.json({ message: 'Booking deleted successfully' })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }

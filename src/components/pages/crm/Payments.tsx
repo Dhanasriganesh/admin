@@ -213,12 +213,26 @@ const Payments: React.FC = () => {
         setPaymentToDelete(null)
         alert('Payment record deleted successfully')
       } else {
-        const data = await response.json()
-        alert('Failed to delete payment: ' + (data.error || 'Unknown error'))
+        // Handle non-JSON responses gracefully
+        let errorMessage = 'Unknown error'
+        try {
+          const contentType = response.headers.get('content-type')
+          if (contentType && contentType.includes('application/json')) {
+            const data = await response.json()
+            errorMessage = data.error || 'Unknown error'
+          } else {
+            // If response is not JSON, get text content
+            const textResponse = await response.text()
+            errorMessage = textResponse || `HTTP ${response.status}: ${response.statusText}`
+          }
+        } catch (parseError) {
+          errorMessage = `HTTP ${response.status}: ${response.statusText}`
+        }
+        alert('Failed to delete payment: ' + errorMessage)
       }
     } catch (error: any) {
       console.error('Error deleting payment:', error)
-      alert('Failed to delete payment record')
+      alert('Failed to delete payment record: ' + (error.message || 'Network error'))
     } finally {
       setDeleting(false)
     }
