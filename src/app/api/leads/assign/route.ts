@@ -102,8 +102,8 @@ export async function POST(request: NextRequest) {
     } catch (emailError) {
       console.error('❌ Error sending employee details email:', emailError)
       console.error('Error details:', {
-        message: emailError.message,
-        stack: emailError.stack
+        message: emailError instanceof Error ? emailError.message : 'Unknown error',
+        stack: emailError instanceof Error ? emailError.stack : 'No stack trace'
       })
     }
     console.log('=== END EMAIL DEBUG ===')
