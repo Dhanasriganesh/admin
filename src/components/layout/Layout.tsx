@@ -114,12 +114,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="flex items-center justify-between h-14 px-3 py-2 border-b border-gray-100">
           {!sidebarCollapsed && (
             <Link to="/" className="relative inline-flex items-center px-2 py-1 rounded-md">
-              <div className="absolute inset-0 rounded-md bg-primary" />
+              <div className="absolute inset-0 rounded-md bg-blue-600" />
               <Image src={logo} alt="Travloger.in" width={120} height={24} priority className="relative z-10" />
             </Link>
           )}
           {sidebarCollapsed && (
-            <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+            <div className="w-8 h-8 bg-blue-600 rounded-md flex items-center justify-center">
               <span className="text-white text-xs font-bold">T</span>
             </div>
           )}

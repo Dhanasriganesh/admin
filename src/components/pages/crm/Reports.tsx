@@ -1,74 +1,196 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
-interface LeadSource {
-  source: string
-  count: number
-  percentage: number
-  revenue: number
-}
 
-interface AgentPerformance {
-  name: string
-  leads: number
-  bookings: number
-  revenue: number
-  conversion: number
-}
-
-interface MonthlyRevenue {
-  month: string
-  revenue: number
-  bookings: number
-}
-
-interface PackagePerformance {
-  package: string
-  bookings: number
-  revenue: number
-  avgPrice: number
-}
-
-type PeriodType = 'week' | 'month' | 'quarter' | 'year'
+type SectionType = 'leads' | 'payments' | 'bookings'
+type LocationType = 'all' | 'Kashmir' | 'Ladakh' | 'Kerala' | 'Gokarna' | 'Meghalaya' | 'Mysore' | 'Singapore' | 'Hyderabad' | 'Bengaluru' | 'Manali'
 
 const Reports: React.FC = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('month')
+  const [selectedLocation, setSelectedLocation] = useState<LocationType>('all')
+  const [selectedSection, setSelectedSection] = useState<SectionType>('leads')
+  const [selectedMonth, setSelectedMonth] = useState<string>('all')
+  const [selectedYear, setSelectedYear] = useState<string>('all')
+  const [reportData, setReportData] = useState<any[]>([])
+  const [loading, setLoading] = useState<boolean>(false)
+  const [generatingReport, setGeneratingReport] = useState<boolean>(false)
 
-  const leadSources: LeadSource[] = [
-    { source: 'Google Ads', count: 245, percentage: 35, revenue: 12500 },
-    { source: 'Website', count: 180, percentage: 26, revenue: 9800 },
-    { source: 'WhatsApp', count: 150, percentage: 21, revenue: 7500 },
-    { source: 'Phone', count: 125, percentage: 18, revenue: 6200 }
-  ]
 
-  const agentPerformance: AgentPerformance[] = [
-    { name: 'Sarah Wilson', leads: 45, bookings: 12, revenue: 15600, conversion: 26.7 },
-    { name: 'Mike Johnson', leads: 38, bookings: 15, revenue: 18900, conversion: 39.5 },
-    { name: 'Lisa Davis', leads: 42, bookings: 11, revenue: 14200, conversion: 26.2 },
-    { name: 'David Brown', leads: 35, bookings: 9, revenue: 11800, conversion: 25.7 }
-  ]
+  // Fetch report data based on selections
+  const fetchReportData = async () => {
+    setLoading(true)
+    try {
+      let apiEndpoint = ''
+      let queryParams = new URLSearchParams()
 
-  const monthlyRevenue: MonthlyRevenue[] = [
-    { month: 'Jan', revenue: 12500, bookings: 12 },
-    { month: 'Feb', revenue: 18900, bookings: 18 },
-    { month: 'Mar', revenue: 14200, bookings: 14 },
-    { month: 'Apr', revenue: 21800, bookings: 22 },
-    { month: 'May', revenue: 16200, bookings: 16 },
-    { month: 'Jun', revenue: 19500, bookings: 19 }
-  ]
+      // Add location filter (only for API calls)
+      if (selectedLocation !== 'all') {
+        queryParams.append('destination', selectedLocation)
+      }
 
-  const packagePerformance: PackagePerformance[] = [
-    { package: 'Bali Adventure', bookings: 15, revenue: 37500, avgPrice: 2500 },
-    { package: 'European Tour', bookings: 12, revenue: 50400, avgPrice: 4200 },
-    { package: 'Thailand Discovery', bookings: 18, revenue: 32400, avgPrice: 1800 },
-    { package: 'Japan Experience', bookings: 8, revenue: 25600, avgPrice: 3200 },
-    { package: 'Dubai Luxury', bookings: 6, revenue: 24000, avgPrice: 4000 }
-  ]
+      // Determine API endpoint based on section
+      switch (selectedSection) {
+        case 'leads':
+          apiEndpoint = '/api/leads'
+          break
+        case 'payments':
+          apiEndpoint = '/api/bookings' // Payments are part of bookings
+          break
+        case 'bookings':
+          apiEndpoint = '/api/bookings'
+          break
+        default:
+          apiEndpoint = '/api/leads'
+      }
 
-  const getConversionColor = (rate: number): string => {
-    if (rate >= 35) return 'text-primary'
-    if (rate >= 25) return 'text-yellow-600'
-    return 'text-red-600'
+      const response = await fetch(`${apiEndpoint}?${queryParams.toString()}`)
+      const data = await response.json()
+
+      if (response.ok) {
+        let rawData = data[selectedSection] || data.bookings || data.leads || []
+        
+        // Apply client-side filtering for month and year
+        let filteredData = rawData
+
+        // Filter by location (if not already filtered by API)
+        if (selectedLocation !== 'all') {
+          filteredData = filteredData.filter((item: any) => {
+            return item.destination === selectedLocation
+          })
+        }
+
+        // Filter by month
+        if (selectedMonth !== 'all') {
+          filteredData = filteredData.filter((item: any) => {
+            const itemDate = new Date(item.created_at || item.booking_date || item.payment_date)
+            const itemMonth = (itemDate.getMonth() + 1).toString()
+            return itemMonth === selectedMonth
+          })
+        }
+
+        // Filter by year
+        if (selectedYear !== 'all') {
+          filteredData = filteredData.filter((item: any) => {
+            const itemDate = new Date(item.created_at || item.booking_date || item.payment_date)
+            const itemYear = itemDate.getFullYear().toString()
+            return itemYear === selectedYear
+          })
+        }
+
+        // Debug logging
+        console.log('Raw data count:', rawData.length)
+        console.log('Filtered data count:', filteredData.length)
+        console.log('Selected filters:', { selectedLocation, selectedMonth, selectedYear })
+        if (rawData.length > 0) {
+          console.log('Sample raw data date:', new Date(rawData[0].created_at || rawData[0].booking_date || rawData[0].payment_date))
+        }
+
+        setReportData(filteredData)
+      } else {
+        console.error('Failed to fetch report data:', data.error)
+        setReportData([])
+      }
+    } catch (error) {
+      console.error('Error fetching report data:', error)
+      setReportData([])
+    } finally {
+      setLoading(false)
+    }
   }
+
+  // Generate and download Excel report
+  const downloadExcelReport = async () => {
+    setGeneratingReport(true)
+    try {
+      // Create Excel data based on selected section
+      let excelData: any[] = []
+      let headers: string[] = []
+
+      switch (selectedSection) {
+        case 'leads':
+          headers = ['ID', 'Name', 'Email', 'Phone', 'Source', 'Destination', 'Travelers', 'Travel Dates', 'Notes', 'Created Date']
+          excelData = reportData.map((lead: any) => [
+            lead.id,
+            lead.name || 'N/A',
+            lead.email || 'N/A',
+            lead.phone || 'N/A',
+            lead.source || 'N/A',
+            lead.destination || 'N/A',
+            lead.number_of_travelers || 'N/A',
+            lead.travel_dates || 'N/A',
+            lead.custom_notes || 'N/A',
+            new Date(lead.created_at).toLocaleDateString()
+          ])
+          break
+
+        case 'payments':
+          headers = ['ID', 'Customer', 'Package', 'Amount', 'Payment Status', 'Payment Method', 'Payment Date', 'Due Date', 'Transaction ID']
+          excelData = reportData.map((payment: any) => [
+            payment.id,
+            payment.customer || 'N/A',
+            payment.package || 'N/A',
+            payment.amount || 0,
+            payment.payment_status || payment.paymentStatus || 'N/A',
+            payment.payment_method || payment.paymentMethod || 'N/A',
+            payment.payment_date || payment.paymentDate || 'N/A',
+            payment.due_date || payment.dueDate || 'N/A',
+            payment.transaction_id || payment.transactionId || 'N/A'
+          ])
+          break
+
+        case 'bookings':
+          headers = ['ID', 'Customer', 'Package', 'Destination', 'Amount', 'Status', 'Travelers', 'Travel Date', 'Booking Date']
+          excelData = reportData.map((booking: any) => [
+            booking.id,
+            booking.customer || 'N/A',
+            booking.package || 'N/A',
+            booking.destination || 'N/A',
+            booking.amount || 0,
+            booking.status || 'N/A',
+            booking.travelers || 'N/A',
+            booking.travel_date || 'N/A',
+            new Date(booking.booking_date || booking.created_at).toLocaleDateString()
+          ])
+          break
+      }
+
+      // Create CSV content
+      const csvContent = [
+        headers.join(','),
+        ...excelData.map(row => row.map((cell: any) => `"${cell}"`).join(','))
+      ].join('\n')
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      
+      // Generate filename based on selections
+      const locationStr = selectedLocation === 'all' ? 'All-Locations' : selectedLocation
+      const monthStr = selectedMonth === 'all' ? 'All-Months' : selectedMonth
+      const yearStr = selectedYear === 'all' ? 'All-Years' : selectedYear
+      const filename = `${selectedSection.toUpperCase()}-Report-${locationStr}-${monthStr}-${yearStr}-${new Date().toISOString().split('T')[0]}.csv`
+      
+      link.setAttribute('download', filename)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      alert(`Report downloaded successfully: ${filename}`)
+    } catch (error) {
+      console.error('Error generating report:', error)
+      alert('Failed to generate report. Please try again.')
+    } finally {
+      setGeneratingReport(false)
+    }
+  }
+
+  // Fetch data when selections change
+  useEffect(() => {
+    if (selectedLocation && selectedSection && selectedMonth && selectedYear) {
+      fetchReportData()
+    }
+  }, [selectedLocation, selectedSection, selectedMonth, selectedYear])
 
   return (
     <div className="space-y-6">
@@ -76,200 +198,222 @@ const Reports: React.FC = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Reports & Analytics</h1>
-          <p className="text-gray-600">Track performance and business insights</p>
+          <p className="text-gray-600">Generate detailed reports based on location, section, and time period</p>
         </div>
-        <div className="flex items-center space-x-4">
-          <select
-            value={selectedPeriod}
-            onChange={(e) => setSelectedPeriod(e.target.value as PeriodType)}
-            className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+        <div className="flex items-center space-x-2">
+          <button 
+            onClick={downloadExcelReport}
+            disabled={generatingReport || reportData.length === 0}
+            className="bg-gray-600 text-white px-3 py-1.5 rounded-md hover:bg-gray-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
           >
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-            <option value="quarter">This Quarter</option>
-            <option value="year">This Year</option>
-          </select>
-          <button className="bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition-colors">
-            Export Report
+            {generatingReport ? (
+              <>
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                <span>Generating...</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>Download Excel</span>
+              </>
+            )}
           </button>
         </div>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">💰</span>
+      {/* Report Filters */}
+      <div className="bg-white shadow rounded-lg p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Location Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+            <select
+              value={selectedLocation}
+              onChange={(e) => setSelectedLocation(e.target.value as LocationType)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Locations</option>
+              <option value="Kashmir">Kashmir</option>
+              <option value="Ladakh">Ladakh</option>
+              <option value="Kerala">Kerala</option>
+              <option value="Gokarna">Gokarna</option>
+              <option value="Meghalaya">Meghalaya</option>
+              <option value="Mysore">Mysore</option>
+              <option value="Singapore">Singapore</option>
+              <option value="Hyderabad">Hyderabad</option>
+              <option value="Bengaluru">Bengaluru</option>
+              <option value="Manali">Manali</option>
+            </select>
                 </div>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total Revenue</dt>
-                  <dd className="text-lg font-medium text-gray-900">$103,200</dd>
-                </dl>
-              </div>
-            </div>
+
+          {/* Section Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Report Section</label>
+            <select
+              value={selectedSection}
+              onChange={(e) => setSelectedSection(e.target.value as SectionType)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="leads">Leads</option>
+              <option value="payments">Payments</option>
+              <option value="bookings">Bookings</option>
+            </select>
+          </div>
+
+          {/* Month Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Month</label>
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Months</option>
+              <option value="1">January</option>
+              <option value="2">February</option>
+              <option value="3">March</option>
+              <option value="4">April</option>
+              <option value="5">May</option>
+              <option value="6">June</option>
+              <option value="7">July</option>
+              <option value="8">August</option>
+              <option value="9">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+        </div>
+
+          {/* Year Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Years</option>
+              <option value="2024">2024</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+              <option value="2021">2021</option>
+              <option value="2020">2020</option>
+            </select>
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">📈</span>
-                </div>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Conversion Rate</dt>
-                  <dd className="text-lg font-medium text-gray-900">29.5%</dd>
-                </dl>
-              </div>
+        {/* Report Summary */}
+        <div className="mt-4 p-3 bg-gray-50 rounded-md">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-600">
+              <span className="font-medium">Report Summary:</span> {selectedSection.toUpperCase()} data for {selectedLocation === 'all' ? 'All Locations' : selectedLocation} 
+              {selectedMonth !== 'all' && ` in ${new Date(0, parseInt(selectedMonth) - 1).toLocaleString('default', { month: 'long' })}`}
+              {selectedYear !== 'all' && ` ${selectedYear}`}
+            </div>
+            <div className="text-sm font-medium text-gray-900">
+              {loading ? 'Loading...' : `${reportData.length} records found`}
             </div>
           </div>
-        </div>
-
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">👥</span>
-                </div>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total Leads</dt>
-                  <dd className="text-lg font-medium text-gray-900">700</dd>
-                </dl>
-              </div>
+          {!loading && reportData.length === 0 && (
+            <div className="mt-2 text-sm text-amber-600">
+              ⚠️ No data found for the selected filters. Try adjusting your location, month, or year selection.
             </div>
-          </div>
-        </div>
-
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">✈️</span>
-                </div>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total Bookings</dt>
-                  <dd className="text-lg font-medium text-gray-900">59</dd>
-                </dl>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Lead Sources */}
+      {/* Data Preview */}
+      {reportData.length > 0 && (
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Lead Sources</h3>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              {leadSources.map((source, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-primary rounded-full mr-3"></div>
-                    <span className="text-sm font-medium text-gray-900">{source.source}</span>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <span className="text-sm text-gray-500">{source.count} leads</span>
-                    <span className="text-sm font-medium text-gray-900">{source.percentage}%</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Agent Performance */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Agent Performance</h3>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              {agentPerformance.map((agent, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{agent.name}</p>
-                    <p className="text-xs text-gray-500">{agent.leads} leads • {agent.bookings} bookings</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">${agent.revenue.toLocaleString()}</p>
-                    <p className={`text-xs font-medium ${getConversionColor(agent.conversion)}`}>
-                      {agent.conversion}% conversion
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Revenue Chart */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">Monthly Revenue Trend</h3>
-        </div>
-        <div className="p-6">
-          <div className="h-64 flex items-end justify-between space-x-2">
-            {monthlyRevenue.map((month, index) => (
-              <div key={index} className="flex flex-col items-center flex-1">
-                <div 
-                  className="w-full bg-primary rounded-t mb-2" 
-                  style={{ height: `${(month.revenue / 25000) * 200}px` }}
-                ></div>
-                <span className="text-xs text-gray-500">{month.month}</span>
-                <span className="text-xs text-gray-400">${month.revenue.toLocaleString()}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Package Performance */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">Package Performance</h3>
+            <h3 className="text-lg font-medium text-gray-900">Data Preview</h3>
+            <p className="text-sm text-gray-600">Preview of {reportData.length} records that will be included in the Excel report</p>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                  {selectedSection === 'leads' && (
+                    <>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destination</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                    </>
+                  )}
+                  {selectedSection === 'payments' && (
+                    <>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    </>
+                  )}
+                  {selectedSection === 'bookings' && (
+                    <>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Package</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bookings</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Price</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destination</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    </>
+                  )}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {packagePerformance.map((pkg, index) => (
+                {reportData.slice(0, 10).map((item: any, index: number) => (
                 <tr key={index}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{pkg.package}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{pkg.bookings}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${pkg.revenue.toLocaleString()}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${pkg.avgPrice.toLocaleString()}</td>
+                    {selectedSection === 'leads' && (
+                      <>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.name || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.email || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.phone || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.source || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.destination || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{new Date(item.created_at).toLocaleDateString()}</td>
+                      </>
+                    )}
+                    {selectedSection === 'payments' && (
+                      <>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.customer || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹{item.amount || 0}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.payment_status || item.paymentStatus || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.payment_method || item.paymentMethod || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{new Date(item.payment_date || item.paymentDate || item.created_at).toLocaleDateString()}</td>
+                      </>
+                    )}
+                    {selectedSection === 'bookings' && (
+                      <>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.customer || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.package || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.destination || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹{item.amount || 0}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.status || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{new Date(item.booking_date || item.created_at).toLocaleDateString()}</td>
+                      </>
+                    )}
                 </tr>
               ))}
             </tbody>
           </table>
+            {reportData.length > 10 && (
+              <div className="px-6 py-3 bg-gray-50 text-sm text-gray-600">
+                Showing first 10 of {reportData.length} records. All records will be included in the Excel download.
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
+
+
+
+
     </div>
   )
 }

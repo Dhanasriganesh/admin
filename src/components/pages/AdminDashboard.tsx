@@ -15,6 +15,66 @@ const AdminDashboard: React.FC = () => {
   const [upcomingBookings, setUpcomingBookings] = useState<any[]>([])
   const [loadingLeads, setLoadingLeads] = useState(true)
   const [loadingBookings, setLoadingBookings] = useState(true)
+  
+  // Dashboard stats state
+  const [dashboardStats, setDashboardStats] = useState({
+    totalLeads: 0,
+    activeItineraries: 0,
+    totalRevenue: 0,
+    totalEmployees: 0
+  })
+  const [loadingStats, setLoadingStats] = useState(true)
+
+  // Fetch dashboard statistics
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      try {
+        setLoadingStats(true)
+        
+        // Fetch all data in parallel
+        const [leadsResponse, packagesResponse, bookingsResponse, employeesResponse] = await Promise.all([
+          fetch('/api/leads'),
+          fetch('/api/packages'),
+          fetch('/api/bookings'),
+          fetch('/api/employees')
+        ])
+        
+        const [leadsData, packagesData, bookingsData, employeesData] = await Promise.all([
+          leadsResponse.json(),
+          packagesResponse.json(),
+          bookingsResponse.json(),
+          employeesResponse.json()
+        ])
+        
+        // Calculate stats
+        const totalLeads = leadsData.leads?.length || 0
+        const activeItineraries = packagesData.packages?.length || 0
+        const totalRevenue = bookingsData.bookings?.reduce((sum: number, booking: any) => {
+          // Only include bookings that are paid
+          if (booking.payment_status === 'Paid' || booking.paymentStatus === 'Paid') {
+            return sum + (parseFloat(booking.amount) || 0)
+          }
+          return sum
+        }, 0) || 0
+        
+        // Get total employees count
+        const totalEmployees = employeesData.employees?.length || 0
+        
+        setDashboardStats({
+          totalLeads,
+          activeItineraries,
+          totalRevenue,
+          totalEmployees
+        })
+      } catch (error) {
+        console.error('Error fetching dashboard stats:', error)
+      } finally {
+        setLoadingStats(false)
+      }
+    }
+    
+    fetchDashboardStats()
+  }, [])
 
   // Fetch recent leads
   useEffect(() => {
@@ -62,10 +122,38 @@ const AdminDashboard: React.FC = () => {
   }, [])
 
   const stats: StatItem[] = [
-    { name: 'Total Leads', value: '0', change: '0% change from this week', changeType: 'increase', href: '/leads', icon: '👥' },
-    { name: 'Pending Approvals', value: '0', change: '0% change from past week', changeType: 'increase', href: '/approvals', icon: '✓' },
-    { name: 'Total Revenue', value: '₹0', change: '0% change from this week', changeType: 'increase', href: '/payments', icon: '📈' },
-    { name: 'Active Cities', value: '0', change: '0% change from this week', changeType: 'increase', href: '/reports', icon: '📁' },
+    { 
+      name: 'Total Leads', 
+      value: loadingStats ? '...' : (dashboardStats.totalLeads || 0).toString(), 
+      change: '0% change from this week', 
+      changeType: 'increase', 
+      href: '/leads', 
+      icon: '👥' 
+    },
+    { 
+      name: 'Active Itineraries', 
+      value: loadingStats ? '...' : (dashboardStats.activeItineraries || 0).toString(), 
+      change: '0% change from past week', 
+      changeType: 'increase', 
+      href: '/packages', 
+      icon: '🗺️' 
+    },
+    { 
+      name: 'Total Revenue', 
+      value: loadingStats ? '...' : `₹${(dashboardStats.totalRevenue || 0).toLocaleString()}`, 
+      change: '0% change from this week', 
+      changeType: 'increase', 
+      href: '/payments', 
+      icon: '📈' 
+    },
+    { 
+      name: 'Total Employees', 
+      value: loadingStats ? '...' : (dashboardStats.totalEmployees || 0).toString(), 
+      change: '0% change from this week', 
+      changeType: 'increase', 
+      href: '/employees', 
+      icon: '👨‍💼' 
+    },
   ]
 
   // Quick Actions

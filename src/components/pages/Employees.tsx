@@ -26,6 +26,11 @@ const Employees: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false)
   const [showEditModal, setShowEditModal] = useState<boolean>(false)
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
+  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false)
+  const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null)
+  const [deleting, setDeleting] = useState<boolean>(false)
+  const [selectedMonth, setSelectedMonth] = useState<string>('all')
+  const [selectedYear, setSelectedYear] = useState<string>('all')
   const [newEmployee, setNewEmployee] = useState<NewEmployee>({ 
     name: '', 
     email: '', 
@@ -59,6 +64,53 @@ const Employees: React.FC = () => {
     } catch (e: any) {
       alert('Failed to delete employee')
     }
+  }
+
+  const handleDeleteEmployeeFromModal = async (employeeId: number): Promise<void> => {
+    try {
+      setDeleting(true)
+      const { error } = await supabase
+        .from('employees')
+        .delete()
+        .eq('id', employeeId)
+      
+      if (error) throw error
+      
+      setEmployees(employees.filter(emp => emp.id !== employeeId))
+      setShowDeleteModal(false)
+      setEmployeeToDelete(null)
+      alert('Employee record deleted successfully')
+    } catch (error) {
+      console.error('Error deleting employee:', error)
+      alert('Failed to delete employee record')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  const openDeleteModal = (employee: Employee): void => {
+    setEmployeeToDelete(employee)
+    setShowDeleteModal(true)
+  }
+
+  // Filter employees based on month and year (using mock date since we don't have created_at)
+  const getFilteredEmployees = (): Employee[] => {
+    if (selectedMonth === 'all' && selectedYear === 'all') return employees
+
+    const filteredEmployees = employees.filter(employee => {
+      // For employees, we'll use a mock date since we don't have created_at in the interface
+      // You might want to add created_at or joined_date to your Employee interface
+      const employeeDate = new Date() // This should be employee.created_at or employee.joined_date
+      const employeeMonth = (employeeDate.getMonth() + 1).toString() // getMonth() returns 0-11, so add 1
+      const employeeYear = employeeDate.getFullYear().toString()
+
+      const monthMatch = selectedMonth === 'all' || employeeMonth === selectedMonth
+      const yearMatch = selectedYear === 'all' || employeeYear === selectedYear
+
+      return monthMatch && yearMatch
+    })
+
+    return filteredEmployees
   }
 
   const handleSaveEmployee = async () => {
@@ -308,18 +360,78 @@ const Employees: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">Employee Management</h1>
           <p className="text-gray-600">Manage employees, roles, and statuses</p>
         </div>
-        <button
-          className="bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition-colors"
-          onClick={() => setShowCreateModal(true)}
-        >
-          Add Employee
-        </button>
+        <div className="flex items-center space-x-3">
+          {/* Month Filter */}
+          <div className="flex items-center space-x-2">
+            <label className="text-sm font-medium text-gray-700">Month:</label>
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Months</option>
+              <option value="1">January</option>
+              <option value="2">February</option>
+              <option value="3">March</option>
+              <option value="4">April</option>
+              <option value="5">May</option>
+              <option value="6">June</option>
+              <option value="7">July</option>
+              <option value="8">August</option>
+              <option value="9">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+          </div>
+          
+          {/* Year Filter */}
+          <div className="flex items-center space-x-2">
+            <label className="text-sm font-medium text-gray-700">Year:</label>
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Years</option>
+              <option value="2024">2024</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+              <option value="2021">2021</option>
+              <option value="2020">2020</option>
+            </select>
+          </div>
+          <div className="flex space-x-2">
+            {getFilteredEmployees().filter(emp => emp.status === 'Inactive').length > 0 && (
+              <button 
+                onClick={() => {
+                  const inactiveEmployees = getFilteredEmployees().filter(emp => emp.status === 'Inactive')
+                  if (confirm(`Delete ${inactiveEmployees.length} inactive employee records? This action cannot be undone.`)) {
+                    // Bulk delete inactive employees
+                    inactiveEmployees.forEach(employee => {
+                      handleDeleteEmployeeFromModal(employee.id)
+                    })
+                  }
+                }}
+                className="bg-red-500 text-white px-3 py-1.5 rounded-md hover:bg-red-600 transition-colors text-sm"
+              >
+                Clean Inactive ({getFilteredEmployees().filter(emp => emp.status === 'Inactive').length})
+              </button>
+            )}
+            <button
+              className="bg-gray-600 text-white px-3 py-1.5 rounded-md hover:bg-gray-700 transition-colors text-sm"
+              onClick={() => setShowCreateModal(true)}
+            >
+              Add Employee
+            </button>
+          </div>
+        </div>
       </div>
 
 
       <div className="bg-white shadow overflow-hidden sm:rounded-md">
         <ul className="divide-y divide-gray-200">
-          {employees.map((emp) => (
+          {getFilteredEmployees().map((emp) => (
             <li key={emp.id}>
               <div className="px-4 py-4 sm:px-6 flex items-center justify-between">
                 <div className="flex items-center">
@@ -341,6 +453,13 @@ const Employees: React.FC = () => {
                     className="text-primary text-sm hover:opacity-80"
                   >
                     Edit
+                  </button>
+                  <button 
+                    onClick={() => openDeleteModal(emp)}
+                    className="text-red-500 text-xs hover:text-red-600"
+                    title="Delete Employee Record"
+                  >
+                    Delete
                   </button>
                 </div>
               </div>
@@ -552,6 +671,76 @@ const Employees: React.FC = () => {
                 >
                   Save Changes
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && employeeToDelete && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">Delete Employee Record</h3>
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div className="text-center">
+                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                  <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </div>
+                
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Are you sure you want to delete this employee record?
+                </h3>
+                
+                <div className="bg-gray-50 p-4 rounded-lg mb-4">
+                  <p className="text-sm text-gray-600">
+                    <strong>Name:</strong> {employeeToDelete.name}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    <strong>Email:</strong> {employeeToDelete.email}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    <strong>Phone:</strong> {employeeToDelete.phone}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    <strong>Role:</strong> {employeeToDelete.role}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    <strong>Status:</strong> {employeeToDelete.status}
+                  </p>
+                </div>
+                
+                <p className="text-sm text-gray-500 mb-6">
+                  This action cannot be undone. The employee record will be permanently removed from the database.
+                </p>
+                
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setShowDeleteModal(false)}
+                    className="flex-1 px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                    disabled={deleting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => handleDeleteEmployeeFromModal(employeeToDelete.id)}
+                    className="flex-1 px-3 py-1.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors disabled:opacity-50"
+                    disabled={deleting}
+                  >
+                    {deleting ? 'Deleting...' : 'Delete Record'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
