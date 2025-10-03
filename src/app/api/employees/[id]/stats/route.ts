@@ -82,7 +82,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const recentBookings = bookings?.slice(0, 10) || []
 
     // Get performance by destination
-    const destinationStats = {}
+    const destinationStats: { [key: string]: { leads: number; bookings: number; revenue: number } } = {}
     assignedLeads?.forEach(lead => {
       const dest = lead.destination || 'Unknown'
       if (!destinationStats[dest]) {

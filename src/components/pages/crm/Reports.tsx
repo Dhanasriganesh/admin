@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 
 
 type SectionType = 'leads' | 'payments' | 'bookings'
@@ -15,7 +15,7 @@ const Reports: React.FC = () => {
 
 
   // Fetch report data based on selections
-  const fetchReportData = async () => {
+  const fetchReportData = useCallback(async () => {
     setLoading(true)
     try {
       let apiEndpoint = ''
@@ -94,7 +94,7 @@ const Reports: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedLocation, selectedSection, selectedMonth, selectedYear])
 
   // Generate and download Excel report
   const downloadExcelReport = async () => {
@@ -192,7 +192,7 @@ const Reports: React.FC = () => {
     if (selectedLocation && selectedSection && selectedMonth && selectedYear) {
       fetchReportData()
     }
-  }, [selectedLocation, selectedSection, selectedMonth, selectedYear])
+  }, [selectedLocation, selectedSection, selectedMonth, selectedYear, fetchReportData])
 
   return (
     <div className="space-y-6">

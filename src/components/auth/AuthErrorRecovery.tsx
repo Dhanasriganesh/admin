@@ -46,7 +46,7 @@ const AuthErrorRecovery: React.FC<AuthErrorRecoveryProps> = ({ error, onRetry })
             Your session has expired or become invalid. This usually happens when:
           </p>
           <ul className="mt-2 text-sm text-gray-600 list-disc list-inside">
-            <li>You've been logged out for too long</li>
+            <li>You&apos;ve been logged out for too long</li>
             <li>Your browser data was cleared</li>
             <li>There was a connection issue</li>
           </ul>
@@ -70,7 +70,7 @@ const AuthErrorRecovery: React.FC<AuthErrorRecoveryProps> = ({ error, onRetry })
         </div>
         
         <div className="mt-4 text-xs text-gray-500">
-          <p>Clicking "Clear & Restart" will:</p>
+          <p>Clicking &quot;Clear &amp; Restart&quot; will:</p>
           <ul className="mt-1 list-disc list-inside">
             <li>Clear all stored authentication data</li>
             <li>Reload the page</li>
