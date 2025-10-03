@@ -16,7 +16,8 @@ interface AuthContextType {
   token: string | null
   login: (email: string, password: string) => Promise<void>
   signup: (name: string, email: string, password: string, role: 'admin' | 'employee' | 'Super Admin' | 'Agent' | 'Employer') => Promise<void>
-  logout: () => void
+  logout: () => Promise<void>
+  clearAuthData: () => Promise<void>
   loading: boolean
   isAuthenticated: boolean
   isFirstLogin: boolean
@@ -38,17 +39,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
-          email: session.user.email || '',
-          role: session.user.user_metadata?.role || 'employee',
-          user_metadata: session.user.user_metadata
-        })
-        setToken(session.access_token)
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (error) {
+          console.error('Session error:', error)
+          // If refresh token is invalid, clear the session
+          if (error.message?.includes('Refresh Token Not Found') || error.message?.includes('refresh_token_not_found')) {
+            console.log('Clearing invalid session...')
+            await supabase.auth.signOut()
+            // Clear any stored auth data
+            localStorage.removeItem('sb-' + process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0] + '-auth-token')
+            sessionStorage.clear()
+          }
+        }
+        
+        if (session?.user) {
+          setUser({
+            id: session.user.id,
+            name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+            email: session.user.email || '',
+            role: session.user.user_metadata?.role || 'employee',
+            user_metadata: session.user.user_metadata
+          })
+          setToken(session.access_token)
+        }
+      } catch (error) {
+        console.error('Error getting initial session:', error)
+        // Clear any corrupted auth data
+        await supabase.auth.signOut()
+        localStorage.removeItem('sb-' + process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0] + '-auth-token')
+        sessionStorage.clear()
       }
       setLoading(false)
     }
@@ -57,7 +78,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
+      console.log('Auth state change:', event, session ? 'session exists' : 'no session')
+      
+      if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+        // Handle sign out or token refresh
+        if (session?.user) {
+          setUser({
+            id: session.user.id,
+            name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+            email: session.user.email || '',
+            role: session.user.user_metadata?.role || 'employee',
+            user_metadata: session.user.user_metadata
+          })
+          setToken(session.access_token)
+        } else {
+          setUser(null)
+          setToken(null)
+        }
+      } else if (session?.user) {
         setUser({
           id: session.user.id,
           name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
@@ -142,10 +180,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }
 
   const logout = async () => {
-    await supabase.auth.signOut()
-    setUser(null)
-    setToken(null)
-    setIsFirstLogin(false)
+    try {
+      await supabase.auth.signOut()
+    } catch (error) {
+      console.error('Error during logout:', error)
+    } finally {
+      setUser(null)
+      setToken(null)
+      setIsFirstLogin(false)
+      // Clear all auth-related storage
+      localStorage.removeItem('sb-' + process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0] + '-auth-token')
+      sessionStorage.clear()
+    }
+  }
+
+  const clearAuthData = async () => {
+    try {
+      await supabase.auth.signOut()
+    } catch (error) {
+      console.error('Error clearing auth data:', error)
+    } finally {
+      setUser(null)
+      setToken(null)
+      setIsFirstLogin(false)
+      // Clear all auth-related storage
+      localStorage.removeItem('sb-' + process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0] + '-auth-token')
+      sessionStorage.clear()
+    }
   }
 
   const checkFirstLogin = async (email: string): Promise<boolean> => {
@@ -176,6 +237,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     signup,
     logout,
+    clearAuthData,
     loading,
     isAuthenticated: !!user && !!token,
     isFirstLogin,

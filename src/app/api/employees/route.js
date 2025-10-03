@@ -13,7 +13,8 @@ export async function GET(request) {
       .order('name', { ascending: true })
 
     if (destination && destination !== 'all') {
-      query = query.eq('destination', destination)
+      // Use case-insensitive comparison for destination matching
+      query = query.ilike('destination', destination)
     }
 
     const { data, error } = await query

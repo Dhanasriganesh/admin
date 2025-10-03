@@ -230,7 +230,7 @@ const Leads: React.FC = () => {
           assigned_employee_email: employeeEmail
         } : null)
         
-        alert(`Successfully assigned lead to ${employeeName}. An email with guide details has been sent to ${assigningLead.email}.`)
+        alert(`Successfully assigned lead to ${employeeName}. Emails have been sent to both the customer (${assigningLead.email}) and the employee (${employeeEmail}) with relevant details.`)
       } else {
         const err = await res.json().catch(() => ({}))
         alert(err.error || 'Failed to assign lead')
@@ -505,13 +505,23 @@ const Leads: React.FC = () => {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-6 h-6 bg-green-500 rounded-md flex items-center justify-center">
-                  <span className="text-white text-xs font-medium">G</span>
+                  <span className="text-white text-xs font-medium">S</span>
                 </div>
               </div>
               <div className="ml-3 w-0 flex-1">
                 <dl>
-                  <dt className="text-xs font-medium text-gray-500 truncate">Google Ads</dt>
-                  <dd className="text-sm font-medium text-gray-900">{leads.filter(l => l.source === 'google_ads').length}</dd>
+                  <dt className="text-xs font-medium text-gray-500 truncate">Social Leads</dt>
+                  <dd className="text-sm font-medium text-gray-900">
+                    {leads.filter(l => 
+                      l.source === 'Meta Ads' || 
+                      l.source === 'Whatsapp' || 
+                      l.source === 'google_ads' ||
+                      l.source === 'facebook' ||
+                      l.source === 'instagram' ||
+                      l.source === 'twitter' ||
+                      l.source === 'linkedin'
+                    ).length}
+                  </dd>
                 </dl>
               </div>
             </div>
@@ -1298,7 +1308,7 @@ const Leads: React.FC = () => {
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span>Save Lead</span>
+                      <span>Create Lead</span>
                     </>
                   )}
                 </button>

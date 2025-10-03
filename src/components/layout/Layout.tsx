@@ -43,6 +43,7 @@ const navigationSections: NavigationSection[] = [
   },
   {
     items: [
+      { name: 'Users', href: '/users', icon: UserGroupIcon },
       { name: 'Leads', href: '/leads', icon: UserGroupIcon },
       { name: 'Bookings', href: '/bookings', icon: ClipboardDocumentListIcon },
       { name: 'Payments', href: '/payments', icon: CurrencyDollarIcon },
@@ -112,12 +113,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="flex items-center justify-between h-14 px-3 py-2 border-b border-gray-100">
           {!sidebarCollapsed && (
             <Link to="/" className="relative inline-flex items-center px-2 py-1 rounded-md">
-              <div className="absolute inset-0 rounded-md bg-blue-600" />
+              <div className="absolute inset-0 rounded-md" style={{ backgroundColor: '#00A896' }} />
               <Image src={logo} alt="Travloger.in" width={120} height={24} priority className="relative z-10" />
             </Link>
           )}
           {sidebarCollapsed && (
-            <div className="w-8 h-8 bg-blue-600 rounded-md flex items-center justify-center">
+            <div className="w-8 h-8 rounded-md flex items-center justify-center" style={{ backgroundColor: '#00A896' }}>
               <span className="text-white text-xs font-bold">T</span>
             </div>
           )}

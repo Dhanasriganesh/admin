@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import bcrypt from 'bcryptjs'
 
@@ -29,8 +29,13 @@ const Employees: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false)
   const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null)
   const [deleting, setDeleting] = useState<boolean>(false)
+  const [showProfileModal, setShowProfileModal] = useState<boolean>(false)
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
+  const [employeeStats, setEmployeeStats] = useState<any>(null)
+  const [loadingStats, setLoadingStats] = useState<boolean>(false)
   const [selectedMonth, setSelectedMonth] = useState<string>('all')
   const [selectedYear, setSelectedYear] = useState<string>('all')
+  const [selectedLocation, setSelectedLocation] = useState<string>('all')
   const [newEmployee, setNewEmployee] = useState<NewEmployee>({ 
     name: '', 
     email: '', 
@@ -38,6 +43,15 @@ const Employees: React.FC = () => {
     destination: '',
     password: ''
   })
+  
+  // Destination autocomplete states
+  const [availableDestinations, setAvailableDestinations] = useState<string[]>([])
+  const [showCreateDestinationDropdown, setShowCreateDestinationDropdown] = useState<boolean>(false)
+  const [showEditDestinationDropdown, setShowEditDestinationDropdown] = useState<boolean>(false)
+  const [filteredCreateDestinations, setFilteredCreateDestinations] = useState<string[]>([])
+  const [filteredEditDestinations, setFilteredEditDestinations] = useState<string[]>([])
+  const createDestinationRef = useRef<HTMLInputElement>(null)
+  const editDestinationRef = useRef<HTMLInputElement>(null)
 
   const handleEditEmployee = (employee: Employee) => {
     setEditingEmployee(employee)
@@ -93,9 +107,101 @@ const Employees: React.FC = () => {
     setShowDeleteModal(true)
   }
 
-  // Filter employees based on month and year (using mock date since we don't have created_at)
+  const openProfileModal = async (employee: Employee): Promise<void> => {
+    setSelectedEmployee(employee)
+    setShowProfileModal(true)
+    setLoadingStats(true)
+    
+    try {
+      const response = await fetch(`/api/employees/${employee.id}/stats`)
+      const data = await response.json()
+      
+      if (response.ok && data.stats) {
+        setEmployeeStats(data.stats)
+      } else {
+        console.error('Failed to fetch employee stats:', data.error)
+        setEmployeeStats(null)
+      }
+    } catch (error) {
+      console.error('Error fetching employee stats:', error)
+      setEmployeeStats(null)
+    } finally {
+      setLoadingStats(false)
+    }
+  }
+
+  // Fetch available destinations
+  const fetchDestinations = async () => {
+    try {
+      const response = await fetch('/api/destinations')
+      const data = await response.json()
+      if (data.destinations) {
+        setAvailableDestinations(data.destinations)
+      }
+    } catch (error) {
+      console.error('Failed to fetch destinations:', error)
+    }
+  }
+
+  // Filter destinations based on input
+  const filterDestinations = (input: string, destinations: string[]): string[] => {
+    if (!input.trim()) return destinations
+    return destinations.filter(dest => 
+      dest.toLowerCase().includes(input.toLowerCase())
+    )
+  }
+
+  // Handle destination input change for create modal
+  const handleCreateDestinationChange = (value: string) => {
+    setNewEmployee({ ...newEmployee, destination: value })
+    const filtered = filterDestinations(value, availableDestinations)
+    setFilteredCreateDestinations(filtered)
+    setShowCreateDestinationDropdown(filtered.length > 0 && value.trim() !== '')
+  }
+
+  // Handle destination input change for edit modal
+  const handleEditDestinationChange = (value: string) => {
+    if (editingEmployee) {
+      setEditingEmployee({ ...editingEmployee, destination: value })
+      const filtered = filterDestinations(value, availableDestinations)
+      setFilteredEditDestinations(filtered)
+      setShowEditDestinationDropdown(filtered.length > 0 && value.trim() !== '')
+    }
+  }
+
+  // Select destination from dropdown
+  const selectCreateDestination = (destination: string) => {
+    setNewEmployee({ ...newEmployee, destination })
+    setShowCreateDestinationDropdown(false)
+  }
+
+  const selectEditDestination = (destination: string) => {
+    if (editingEmployee) {
+      setEditingEmployee({ ...editingEmployee, destination })
+      setShowEditDestinationDropdown(false)
+    }
+  }
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (createDestinationRef.current && !createDestinationRef.current.contains(event.target as Node)) {
+        setShowCreateDestinationDropdown(false)
+      }
+      if (editDestinationRef.current && !editDestinationRef.current.contains(event.target as Node)) {
+        setShowEditDestinationDropdown(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
+  // Filter employees based on month, year, and location
   const getFilteredEmployees = (): Employee[] => {
-    if (selectedMonth === 'all' && selectedYear === 'all') return employees
+    if (selectedMonth === 'all' && selectedYear === 'all' && selectedLocation === 'all') return employees
 
     const filteredEmployees = employees.filter(employee => {
       // For employees, we'll use a mock date since we don't have created_at in the interface
@@ -106,8 +212,9 @@ const Employees: React.FC = () => {
 
       const monthMatch = selectedMonth === 'all' || employeeMonth === selectedMonth
       const yearMatch = selectedYear === 'all' || employeeYear === selectedYear
+      const locationMatch = selectedLocation === 'all' || employee.destination === selectedLocation
 
-      return monthMatch && yearMatch
+      return monthMatch && yearMatch && locationMatch
     })
 
     return filteredEmployees
@@ -219,6 +326,7 @@ const Employees: React.FC = () => {
       }
     }
     fetchEmployees()
+    fetchDestinations()
   }, [])
 
   const handleCreateEmployee = async (): Promise<void> => {
@@ -401,6 +509,23 @@ const Employees: React.FC = () => {
               <option value="2020">2020</option>
             </select>
           </div>
+          
+          {/* Location Filter */}
+          <div className="flex items-center space-x-2">
+            <label className="text-sm font-medium text-gray-700">Location:</label>
+            <select
+              value={selectedLocation}
+              onChange={(e) => setSelectedLocation(e.target.value)}
+              className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Locations</option>
+              {availableDestinations.map((destination) => (
+                <option key={destination} value={destination}>
+                  {destination}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="flex space-x-2">
             {getFilteredEmployees().filter(emp => emp.status === 'Inactive').length > 0 && (
               <button 
@@ -430,42 +555,83 @@ const Employees: React.FC = () => {
 
 
       <div className="bg-white shadow overflow-hidden sm:rounded-md">
-        <ul className="divide-y divide-gray-200">
-          {getFilteredEmployees().map((emp) => (
-            <li key={emp.id}>
-              <div className="px-4 py-4 sm:px-6 flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-medium text-primary">
-                      {emp.name.split(' ').map(n => n[0]).join('')}
-                    </span>
+        {getFilteredEmployees().length > 0 ? (
+          <ul className="divide-y divide-gray-200">
+            {getFilteredEmployees().map((emp) => (
+              <li key={emp.id}>
+                <div className="px-4 py-4 sm:px-6 flex items-center justify-between">
+                  <div 
+                    className="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors flex-1"
+                    onClick={() => openProfileModal(emp)}
+                    title="Click to view employee profile and work statistics"
+                  >
+                    <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-medium text-primary">
+                        {emp.name.split(' ').map(n => n[0]).join('')}
+                      </span>
+                    </div>
+                    <div className="ml-4">
+                      <div className="text-sm font-medium text-gray-900">{emp.name}</div>
+                      <div className="text-sm text-gray-500">{emp.email}</div>
+                      {emp.destination && <div className="text-xs text-gray-400">{emp.destination}</div>}
+                    </div>
                   </div>
-                  <div className="ml-4">
-                    <div className="text-sm font-medium text-gray-900">{emp.name}</div>
-                    <div className="text-sm text-gray-500">{emp.email}</div>
-                    {emp.destination && <div className="text-xs text-gray-400">{emp.destination}</div>}
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-gray-700">{emp.role}</span>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleEditEmployee(emp)
+                      }}
+                      className="text-primary text-sm hover:opacity-80"
+                    >
+                      Edit
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        openDeleteModal(emp)
+                      }}
+                      className="text-red-500 text-xs hover:text-red-600"
+                      title="Delete Employee Record"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-gray-700">{emp.role}</span>
-                  <button 
-                    onClick={() => handleEditEmployee(emp)}
-                    className="text-primary text-sm hover:opacity-80"
-                  >
-                    Edit
-                  </button>
-                  <button 
-                    onClick={() => openDeleteModal(emp)}
-                    className="text-red-500 text-xs hover:text-red-600"
-                    title="Delete Employee Record"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="text-center py-12">
+            <div className="mx-auto h-12 w-12 text-gray-400">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">No employees found</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {selectedLocation !== 'all' 
+                ? `No employees found in ${selectedLocation} location.`
+                : selectedMonth !== 'all' || selectedYear !== 'all'
+                ? 'No employees found matching the selected filters.'
+                : 'No employees have been added yet.'
+              }
+            </p>
+            <div className="mt-6">
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(true)}
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              >
+                <svg className="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add Employee
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Create Employee Modal */}
@@ -520,15 +686,33 @@ const Employees: React.FC = () => {
                     title="Enter a 10-digit phone number"
                   />
                 </div>
-                <div>
+                <div className="relative" ref={createDestinationRef}>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Destination</label>
                   <input
                     type="text"
                     value={newEmployee.destination}
-                    onChange={(e) => setNewEmployee({ ...newEmployee, destination: e.target.value })}
+                    onChange={(e) => handleCreateDestinationChange(e.target.value)}
+                    onFocus={() => {
+                      const filtered = filterDestinations(newEmployee.destination, availableDestinations)
+                      setFilteredCreateDestinations(filtered)
+                      setShowCreateDestinationDropdown(filtered.length > 0)
+                    }}
                     className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="Preferred destination"
+                    placeholder="Type to search destinations..."
                   />
+                  {showCreateDestinationDropdown && filteredCreateDestinations.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                      {filteredCreateDestinations.map((destination, index) => (
+                        <div
+                          key={index}
+                          onClick={() => selectCreateDestination(destination)}
+                          className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                        >
+                          {destination}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Password</label>
@@ -552,7 +736,7 @@ const Employees: React.FC = () => {
                   onClick={handleCreateEmployee}
                   className="px-3 py-1.5 bg-primary text-white rounded-md hover:opacity-90 text-sm"
                 >
-                  Save Employee
+                  Create Employee
                 </button>
               </div>
             </div>
@@ -615,15 +799,33 @@ const Employees: React.FC = () => {
                     title="Enter a 10-digit phone number"
                   />
                 </div>
-                <div>
+                <div className="relative" ref={editDestinationRef}>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Destination</label>
                   <input
                     type="text"
                     value={editingEmployee.destination}
-                    onChange={(e) => setEditingEmployee({ ...editingEmployee, destination: e.target.value })}
+                    onChange={(e) => handleEditDestinationChange(e.target.value)}
+                    onFocus={() => {
+                      const filtered = filterDestinations(editingEmployee.destination, availableDestinations)
+                      setFilteredEditDestinations(filtered)
+                      setShowEditDestinationDropdown(filtered.length > 0)
+                    }}
                     className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="Preferred destination"
+                    placeholder="Type to search destinations..."
                   />
+                  {showEditDestinationDropdown && filteredEditDestinations.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                      {filteredEditDestinations.map((destination, index) => (
+                        <div
+                          key={index}
+                          onClick={() => selectEditDestination(destination)}
+                          className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                        >
+                          {destination}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Role</label>
@@ -742,6 +944,190 @@ const Employees: React.FC = () => {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Employee Profile Modal */}
+      {showProfileModal && selectedEmployee && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+          <div className="relative top-10 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+            <div className="mt-1">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center">
+                  <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mr-4">
+                    <span className="text-lg font-medium text-primary">
+                      {selectedEmployee.name.split(' ').map(n => n[0]).join('')}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900">{selectedEmployee.name}</h3>
+                    <p className="text-sm text-gray-500">{selectedEmployee.email}</p>
+                    <p className="text-xs text-gray-400">{selectedEmployee.destination}</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => {
+                    setShowProfileModal(false)
+                    setSelectedEmployee(null)
+                    setEmployeeStats(null)
+                  }} 
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {loadingStats ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  <span className="ml-2 text-gray-600">Loading statistics...</span>
+                </div>
+              ) : employeeStats ? (
+                <div className="space-y-6">
+                  {/* Overview Stats */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">{employeeStats.overview.totalLeadsAssigned}</div>
+                      <div className="text-sm text-blue-800">Total Leads</div>
+                    </div>
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">{employeeStats.overview.totalBookings}</div>
+                      <div className="text-sm text-green-800">Bookings</div>
+                    </div>
+                    <div className="bg-purple-50 p-4 rounded-lg">
+                      <div className="text-2xl font-bold text-purple-600">{employeeStats.overview.conversionRate}%</div>
+                      <div className="text-sm text-purple-800">Conversion Rate</div>
+                    </div>
+                    <div className="bg-yellow-50 p-4 rounded-lg">
+                      <div className="text-2xl font-bold text-yellow-600">₹{employeeStats.overview.totalRevenue.toLocaleString()}</div>
+                      <div className="text-sm text-yellow-800">Revenue</div>
+                    </div>
+                  </div>
+
+                  {/* Leads Status */}
+                  <div className="bg-white border rounded-lg p-4">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-3">Leads Status</h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-gray-600">{employeeStats.leads.byStatus.new}</div>
+                        <div className="text-sm text-gray-500">New Leads</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-blue-600">{employeeStats.leads.byStatus.contacted}</div>
+                        <div className="text-sm text-gray-500">Contacted</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600">{employeeStats.leads.byStatus.converted}</div>
+                        <div className="text-sm text-gray-500">Converted</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bookings Status */}
+                  <div className="bg-white border rounded-lg p-4">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-3">Bookings Status</h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-yellow-600">{employeeStats.bookings.byStatus.pending}</div>
+                        <div className="text-sm text-gray-500">Pending</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600">{employeeStats.bookings.byStatus.confirmed}</div>
+                        <div className="text-sm text-gray-500">Confirmed</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-red-600">{employeeStats.bookings.byStatus.cancelled}</div>
+                        <div className="text-sm text-gray-500">Cancelled</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Payment Status */}
+                  <div className="bg-white border rounded-lg p-4">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-3">Payment Status</h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-yellow-600">{employeeStats.payments.byStatus.pending}</div>
+                        <div className="text-sm text-gray-500">Pending</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600">{employeeStats.payments.byStatus.paid}</div>
+                        <div className="text-sm text-gray-500">Paid</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-red-600">{employeeStats.payments.byStatus.failed}</div>
+                        <div className="text-sm text-gray-500">Failed</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Destination Performance */}
+                  {Object.keys(employeeStats.destinations).length > 0 && (
+                    <div className="bg-white border rounded-lg p-4">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-3">Performance by Destination</h4>
+                      <div className="space-y-2">
+                        {Object.entries(employeeStats.destinations).map(([destination, stats]: [string, any]) => (
+                          <div key={destination} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                            <span className="font-medium">{destination}</span>
+                            <div className="flex gap-4 text-sm">
+                              <span className="text-blue-600">{stats.leads} leads</span>
+                              <span className="text-green-600">{stats.bookings} bookings</span>
+                              <span className="text-purple-600">₹{stats.revenue.toLocaleString()}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Recent Activity */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-white border rounded-lg p-4">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-3">Recent Leads</h4>
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {employeeStats.leads.recent.length > 0 ? (
+                          employeeStats.leads.recent.map((lead: any) => (
+                            <div key={lead.id} className="p-2 bg-gray-50 rounded text-sm">
+                              <div className="font-medium">{lead.name}</div>
+                              <div className="text-gray-500">{lead.destination} • {lead.email}</div>
+                              <div className="text-xs text-gray-400">
+                                {new Date(lead.created_at).toLocaleDateString()}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-gray-500 text-sm">No leads assigned yet</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="bg-white border rounded-lg p-4">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-3">Recent Bookings</h4>
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {employeeStats.bookings.recent.length > 0 ? (
+                          employeeStats.bookings.recent.map((booking: any) => (
+                            <div key={booking.id} className="p-2 bg-gray-50 rounded text-sm">
+                              <div className="font-medium">{booking.customer}</div>
+                              <div className="text-gray-500">{booking.destination} • ₹{booking.amount?.toLocaleString()}</div>
+                              <div className="text-xs text-gray-400">
+                                {booking.status} • {new Date(booking.created_at).toLocaleDateString()}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-gray-500 text-sm">No bookings yet</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">Failed to load employee statistics</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -106,6 +106,53 @@ export async function POST(request: NextRequest) {
         stack: emailError instanceof Error ? emailError.stack : 'No stack trace'
       })
     }
+
+    // Send email to employee with customer details
+    console.log('=== SENDING EMPLOYEE ASSIGNMENT EMAIL ===')
+    try {
+      const employeeEmailUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/email/send-customer-details`
+      console.log('Employee Email API URL:', employeeEmailUrl)
+      
+      const employeeEmailPayload = {
+        employeeEmail: employee.email,
+        employeeName: employee.name,
+        customerName: lead.name,
+        customerEmail: lead.email,
+        customerPhone: lead.phone,
+        destination: lead.destination,
+        numberOfTravelers: lead.number_of_travelers,
+        travelDates: lead.travel_dates,
+        source: lead.source,
+        customNotes: lead.custom_notes
+      }
+      console.log('Employee Email payload:', employeeEmailPayload)
+      
+      console.log('Making employee email API call...')
+      const employeeEmailResponse = await fetch(employeeEmailUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(employeeEmailPayload)
+      })
+
+      console.log('Employee Email API response status:', employeeEmailResponse.status)
+      console.log('Employee Email API response ok:', employeeEmailResponse.ok)
+
+      if (!employeeEmailResponse.ok) {
+        const errorData = await employeeEmailResponse.json().catch(() => ({}))
+        console.error('❌ Failed to send customer details email to employee:', errorData.error || 'Unknown error')
+        console.error('Full error response:', errorData)
+      } else {
+        const successData = await employeeEmailResponse.json()
+        console.log('✅ Customer details email sent to employee successfully:', successData.messageId)
+        console.log('Full success response:', successData)
+      }
+    } catch (employeeEmailError) {
+      console.error('❌ Error sending customer details email to employee:', employeeEmailError)
+      console.error('Error details:', {
+        message: employeeEmailError instanceof Error ? employeeEmailError.message : 'Unknown error',
+        stack: employeeEmailError instanceof Error ? employeeEmailError.stack : 'No stack trace'
+      })
+    }
     console.log('=== END EMAIL DEBUG ===')
 
     return NextResponse.json({ lead: data })

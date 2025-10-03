@@ -305,27 +305,7 @@ const Payments: React.FC = () => {
               <option value="2020">2020</option>
             </select>
           </div>
-          <div className="flex space-x-2">
-            {getFilteredPayments().filter(p => new Date(p.dueDate) < new Date()).length > 0 && (
-              <button 
-                onClick={() => {
-                  const overduePayments = getFilteredPayments().filter(p => new Date(p.dueDate) < new Date())
-                  if (confirm(`Delete ${overduePayments.length} overdue payment records? This action cannot be undone.`)) {
-                    // Bulk delete overdue payments
-                    overduePayments.forEach(payment => {
-                      handleDeletePayment(payment.id)
-                    })
-                  }
-                }}
-                className="bg-red-500 text-white px-3 py-1.5 rounded-md hover:bg-red-600 transition-colors text-sm"
-              >
-                Clean Overdue ({getFilteredPayments().filter(p => new Date(p.dueDate) < new Date()).length})
-              </button>
-            )}
-            <button className="bg-gray-600 text-white px-3 py-1.5 rounded-md hover:bg-gray-700 transition-colors text-sm">
-              Record Payment
-            </button>
-          </div>
+          
         </div>
       </div>
 

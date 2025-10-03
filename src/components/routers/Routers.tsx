@@ -11,6 +11,7 @@ import Blogs from '../pages/cms/Blogs'
 import Settings from '../pages/Settings'
 import WebsiteEdit from '../pages/cms/WebsiteEdit'
 import Employees from '../pages/Employees'
+import Users from '../pages/Users'
 import Login from '../../pages/Login'
 import ProtectedRoute from '../auth/ProtectedRoute'
 
@@ -29,6 +30,11 @@ const Routers: React.FC = () => {
       <Route path="/employee" element={
         <ProtectedRoute>
           <Employeedashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/users" element={
+        <ProtectedRoute>
+          <Users />
         </ProtectedRoute>
       } />
       <Route path="/leads" element={

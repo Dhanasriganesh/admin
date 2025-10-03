@@ -23,4 +23,24 @@ if (typeof window !== 'undefined') {
 }
 
 // Create and export the Supabase client
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
+    flowType: 'pkce'
+  }
+})
+
+// Add global error handler for auth errors
+if (typeof window !== 'undefined') {
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+      // Clear any corrupted auth data on sign out
+      const projectId = supabaseUrl.split('//')[1]?.split('.')[0]
+      if (projectId) {
+        localStorage.removeItem(`sb-${projectId}-auth-token`)
+      }
+    }
+  })
+}
