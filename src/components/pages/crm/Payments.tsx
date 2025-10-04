@@ -36,7 +36,7 @@ interface Payment {
   paid_amount?: number
   remainingAmount: number
   remaining_amount?: number
-  paymentStatus: 'Paid' | 'Partial' | 'Pending' | 'Overdue'
+  paymentStatus: 'Paid' | 'Partial' | 'Pending' | 'Overdue' | 'Cancelled'
   payment_status?: string
   paymentMethod: string
   payment_method?: string
