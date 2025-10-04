@@ -10,6 +10,7 @@ import {
   UserGroupIcon,
   ClipboardDocumentListIcon,
   CurrencyDollarIcon,
+  CurrencyRupeeIcon,
   ChartBarIcon,
   PhotoIcon,
   DocumentTextIcon,
@@ -43,10 +44,10 @@ const navigationSections: NavigationSection[] = [
   },
   {
     items: [
-      { name: 'Users', href: '/users', icon: UserGroupIcon },
+    
       { name: 'Leads', href: '/leads', icon: UserGroupIcon },
       { name: 'Bookings', href: '/bookings', icon: ClipboardDocumentListIcon },
-      { name: 'Payments', href: '/payments', icon: CurrencyDollarIcon },
+      { name: 'Payments', href: '/payments', icon: CurrencyRupeeIcon },
       { name: 'Reports', href: '/reports', icon: ChartBarIcon }
     ]
   },
@@ -54,6 +55,7 @@ const navigationSections: NavigationSection[] = [
     items: [
       { name: 'Website Edit', href: '/website-edit', icon: DocumentTextIcon },
       { name: 'Itinarary Builder', href: '/packages', icon: ClipboardDocumentListIcon },
+      { name: 'Users', href: '/users', icon: UserGroupIcon },
       { name: 'Settings', href: '/settings', icon: CogIcon }
     ]
   }

@@ -181,6 +181,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async () => {
     try {
+      // Clear active session for employee before logout
+      if (user?.role === 'employee' || user?.role === 'Agent') {
+        try {
+          const employeeRes = await fetch(`/api/employees/by-email/${user.email}`)
+          if (employeeRes.ok) {
+            const employeeData = await employeeRes.json()
+            if (employeeData.id) {
+              // Remove the active session
+              await fetch('/api/employees/active-sessions', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ employeeId: employeeData.id })
+              })
+            }
+          }
+        } catch (error) {
+          console.error('Error clearing active session:', error)
+        }
+      }
+      
       await supabase.auth.signOut()
     } catch (error) {
       console.error('Error during logout:', error)
@@ -196,6 +216,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const clearAuthData = async () => {
     try {
+      // Clear active session for employee before clearing auth data
+      if (user?.role === 'employee' || user?.role === 'Agent') {
+        try {
+          const employeeRes = await fetch(`/api/employees/by-email/${user.email}`)
+          if (employeeRes.ok) {
+            const employeeData = await employeeRes.json()
+            if (employeeData.id) {
+              // Remove the active session
+              await fetch('/api/employees/active-sessions', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ employeeId: employeeData.id })
+              })
+            }
+          }
+        } catch (error) {
+          console.error('Error clearing active session:', error)
+        }
+      }
+      
       await supabase.auth.signOut()
     } catch (error) {
       console.error('Error clearing auth data:', error)

@@ -17,7 +17,7 @@ interface Lead {
 }
 
 
-type FilterType = 'all' | 'Kashmir' | 'Ladakh' | 'Kerala' | 'Gokarna' | 'Meghalaya' | 'Mysore' | 'Singapore'
+type FilterType = 'all' | 'Kashmir' | 'Ladakh' | 'Kerala' | 'Gokarna' | 'Meghalaya' | 'Mysore' | 'Singapore' | 'Hyderabad' | 'Bengaluru' | 'Manali'
 
 const Leads: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([])
@@ -30,8 +30,9 @@ const Leads: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false)
   const [leadToDelete, setLeadToDelete] = useState<Lead | null>(null)
   const [deleting, setDeleting] = useState<boolean>(false)
-  const [selectedMonth, setSelectedMonth] = useState<string>('all')
-  const [selectedYear, setSelectedYear] = useState<string>('all')
+  const [selectedMonth, setSelectedMonth] = useState<string>((new Date().getMonth() + 1).toString())
+  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString())
+  const [selectedDate, setSelectedDate] = useState<string>('all')
 
   // Assign modal state
   const [showAssignModal, setShowAssignModal] = useState<boolean>(false)
@@ -80,19 +81,21 @@ const Leads: React.FC = () => {
     fetchLeads()
   }, [])
 
-  // Filter leads based on month and year
+  // Filter leads based on month, year, and date
   const getFilteredLeads = (): Lead[] => {
-    if (selectedMonth === 'all' && selectedYear === 'all') return leads
+    if (selectedMonth === 'all' && selectedYear === 'all' && selectedDate === 'all') return leads
 
     const filteredLeads = leads.filter(lead => {
       const leadDate = new Date(lead.created_at)
       const leadMonth = (leadDate.getMonth() + 1).toString() // getMonth() returns 0-11, so add 1
       const leadYear = leadDate.getFullYear().toString()
+      const leadDateStr = leadDate.toISOString().split('T')[0] // YYYY-MM-DD format
 
       const monthMatch = selectedMonth === 'all' || leadMonth === selectedMonth
       const yearMatch = selectedYear === 'all' || leadYear === selectedYear
+      const dateMatch = selectedDate === 'all' || leadDateStr === selectedDate
 
-      return monthMatch && yearMatch
+      return monthMatch && yearMatch && dateMatch
     })
 
     return filteredLeads
@@ -377,6 +380,23 @@ const Leads: React.FC = () => {
           <p className="text-sm text-gray-600">Manage and track customer inquiries</p>
         </div>
         <div className="flex items-center space-x-3">
+          {/* Date Filter */}
+          <div className="flex items-center space-x-2">
+            <label className="text-sm font-medium text-gray-700">Date:</label>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              onClick={() => setSelectedDate('all')}
+              className="px-2 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+            >
+              All Dates
+            </button>
+          </div>
+
           {/* Month Filter */}
           <div className="flex items-center space-x-2">
             <label className="text-sm font-medium text-gray-700">Month:</label>
@@ -410,6 +430,7 @@ const Leads: React.FC = () => {
               className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Years</option>
+              <option value="2025">2025</option>
               <option value="2024">2024</option>
               <option value="2023">2023</option>
               <option value="2022">2022</option>
@@ -486,7 +507,7 @@ const Leads: React.FC = () => {
           <div className="p-3">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-6 h-6 bg-blue-500 rounded-md flex items-center justify-center">
+                <div className="w-6 h-6 bg-primary rounded-md flex items-center justify-center">
                   <span className="text-white text-xs font-medium">E</span>
                 </div>
               </div>
@@ -504,7 +525,7 @@ const Leads: React.FC = () => {
           <div className="p-3">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-6 h-6 bg-green-500 rounded-md flex items-center justify-center">
+                <div className="w-6 h-6 bg-primary rounded-md flex items-center justify-center">
                   <span className="text-white text-xs font-medium">S</span>
                 </div>
               </div>
@@ -532,7 +553,7 @@ const Leads: React.FC = () => {
           <div className="p-3">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-6 h-6 bg-purple-500 rounded-md flex items-center justify-center">
+                <div className="w-6 h-6 bg-primary rounded-md flex items-center justify-center">
                   <span className="text-white text-xs font-medium">T</span>
                 </div>
               </div>
@@ -620,6 +641,30 @@ const Leads: React.FC = () => {
           >
             Singapore ({leads.filter(l => l.destination === 'Singapore').length})
           </button>
+          <button
+            onClick={() => setFilter('Hyderabad')}
+            className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+              filter === 'Hyderabad' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Hyderabad ({leads.filter(l => l.destination === 'Hyderabad').length})
+          </button>
+          <button
+            onClick={() => setFilter('Bengaluru')}
+            className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+              filter === 'Bengaluru' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Bengaluru ({leads.filter(l => l.destination === 'Bengaluru').length})
+          </button>
+          <button
+            onClick={() => setFilter('Manali')}
+            className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+              filter === 'Manali' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Manali ({leads.filter(l => l.destination === 'Manali').length})
+          </button>
         </div>
       </div>
 
@@ -638,7 +683,7 @@ const Leads: React.FC = () => {
             <div className="text-sm text-gray-500">No leads found</div>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scrollbar-hide">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>

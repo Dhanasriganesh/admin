@@ -1,4 +1,21 @@
 import React, { useState, useEffect } from 'react'
+import {
+  CurrencyRupeeIcon,
+  ClockIcon,
+  ExclamationTriangleIcon,
+  CheckCircleIcon,
+  CreditCardIcon,
+  SmartphoneIcon,
+  BuildingLibraryIcon,
+  WalletIcon,
+  BanknotesIcon,
+  LinkIcon,
+  CalendarIcon,
+  HashtagIcon,
+  TrashIcon,
+  ReceiptIcon,
+  ArrowPathIcon
+} from '../../ui/Icons'
 
 interface VendorPayment {
   vendor: string
@@ -37,7 +54,7 @@ interface Payment {
   travel_date?: string
 }
 
-type FilterType = 'all' | 'paid' | 'partial' | 'pending'
+type FilterType = 'all' | 'paid' | 'pending' | 'cancelled'
 
 const Payments: React.FC = () => {
   const [payments, setPayments] = useState<Payment[]>([])
@@ -65,35 +82,57 @@ const Payments: React.FC = () => {
       
       if (response.ok) {
         // Transform booking data to payment data
-        const transformedPayments = (data.bookings || []).map((booking: any) => ({
-          id: booking.id,
-          bookingId: booking.id,
-          booking_id: booking.id,
-          customer: booking.customer,
-          package: booking.package_name || booking.package || 'N/A',
-          package_name: booking.package_name || booking.package,
-          amount: parseFloat(booking.amount) || 0,
-          paidAmount: booking.payment_status === 'Paid' ? (parseFloat(booking.amount) || 0) : 0,
-          paid_amount: booking.payment_status === 'Paid' ? (parseFloat(booking.amount) || 0) : 0,
-          remainingAmount: booking.payment_status === 'Paid' ? 0 : (parseFloat(booking.amount) || 0),
-          remaining_amount: booking.payment_status === 'Paid' ? 0 : (parseFloat(booking.amount) || 0),
-          paymentStatus: booking.payment_status || 'Pending',
-          payment_status: booking.payment_status,
-          paymentMethod: booking.payment_method || booking.paymentMethod || 'UPI',
-          payment_method: booking.payment_method || booking.paymentMethod,
-          paymentDate: booking.payment_date || (booking.payment_status === 'Paid' ? booking.booking_date : null),
-          payment_date: booking.payment_date,
-          dueDate: booking.due_date || booking.booking_date || new Date().toISOString().split('T')[0],
-          due_date: booking.due_date,
-          transactionId: booking.transaction_id || null,
-          transaction_id: booking.transaction_id,
-          vendorPayments: [], // Will be populated from separate API if needed
-          email: booking.email,
-          phone: booking.phone,
-          destination: booking.destination,
-          travelers: booking.travelers,
-          travel_date: booking.travel_date
-        }))
+        const transformedPayments = (data.bookings || []).map((booking: any) => {
+          // Calculate automatic payment status
+          const calculatePaymentStatus = () => {
+            if (booking.payment_status === 'Paid') {
+              return 'Paid'
+            }
+            
+            // Check if payment link has expired (30 days from booking date)
+            const bookingDate = new Date(booking.booking_date)
+            const thirtyDaysAgo = new Date()
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+            
+            if (bookingDate < thirtyDaysAgo) {
+              return 'Cancelled'
+            }
+            
+            return 'Pending'
+          }
+
+          const automaticStatus = calculatePaymentStatus()
+
+          return {
+            id: booking.id,
+            bookingId: booking.id,
+            booking_id: booking.id,
+            customer: booking.customer,
+            package: booking.package_name || booking.package || 'N/A',
+            package_name: booking.package_name || booking.package,
+            amount: parseFloat(booking.amount) || 0,
+            paidAmount: automaticStatus === 'Paid' ? (parseFloat(booking.amount) || 0) : 0,
+            paid_amount: automaticStatus === 'Paid' ? (parseFloat(booking.amount) || 0) : 0,
+            remainingAmount: automaticStatus === 'Paid' ? 0 : (parseFloat(booking.amount) || 0),
+            remaining_amount: automaticStatus === 'Paid' ? 0 : (parseFloat(booking.amount) || 0),
+            paymentStatus: automaticStatus,
+            payment_status: automaticStatus,
+            paymentMethod: booking.payment_method || booking.paymentMethod || 'UPI',
+            payment_method: booking.payment_method || booking.paymentMethod,
+            paymentDate: booking.payment_date || (automaticStatus === 'Paid' ? booking.booking_date : null),
+            payment_date: booking.payment_date,
+            dueDate: booking.due_date || booking.booking_date || new Date().toISOString().split('T')[0],
+            due_date: booking.due_date,
+            transactionId: booking.transaction_id || null,
+            transaction_id: booking.transaction_id,
+            vendorPayments: [], // Will be populated from separate API if needed
+            email: booking.email,
+            phone: booking.phone,
+            destination: booking.destination,
+            travelers: booking.travelers,
+            travel_date: booking.travel_date
+          }
+        })
         setPayments(transformedPayments)
         setError(null)
       } else {
@@ -133,9 +172,8 @@ const Payments: React.FC = () => {
   const getStatusColor = (status: string): string => {
     switch (status) {
       case 'Paid': return 'bg-primary/10 text-primary'
-      case 'Partial': return 'bg-yellow-100 text-yellow-800'
-      case 'Pending': return 'bg-red-100 text-red-800'
-      case 'Overdue': return 'bg-red-100 text-red-800'
+      case 'Pending': return 'bg-yellow-100 text-yellow-800'
+      case 'Cancelled': return 'bg-red-100 text-red-800'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -148,15 +186,15 @@ const Payments: React.FC = () => {
     }
   }
 
-  const getPaymentMethodIcon = (method: string): string => {
+  const getPaymentMethodIcon = (method: string): React.ReactNode => {
     const methodLower = method.toLowerCase()
-    if (methodLower.includes('upi')) return '📱'
-    if (methodLower.includes('credit') || methodLower.includes('card')) return '💳'
-    if (methodLower.includes('debit')) return '💳'
-    if (methodLower.includes('netbanking') || methodLower.includes('bank')) return '🏦'
-    if (methodLower.includes('wallet')) return '👛'
-    if (methodLower.includes('cash')) return '💵'
-    return '💰'
+    if (methodLower.includes('upi')) return <SmartphoneIcon className="w-3 h-3" />
+    if (methodLower.includes('credit') || methodLower.includes('card')) return <CreditCardIcon className="w-3 h-3" />
+    if (methodLower.includes('debit')) return <CreditCardIcon className="w-3 h-3" />
+    if (methodLower.includes('netbanking') || methodLower.includes('bank')) return <BuildingLibraryIcon className="w-3 h-3" />
+    if (methodLower.includes('wallet')) return <WalletIcon className="w-3 h-3" />
+    if (methodLower.includes('cash')) return <BanknotesIcon className="w-3 h-3" />
+    return <CurrencyRupeeIcon className="w-3 h-3" />
   }
 
   const formatPaymentMethod = (method: string): string => {
@@ -176,27 +214,6 @@ const Payments: React.FC = () => {
     setShowModal(true)
   }
 
-  const handlePaymentStatusUpdate = async (paymentId: number, newStatus: Payment['paymentStatus']): Promise<void> => {
-    try {
-      const response = await fetch('/api/bookings', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: paymentId, payment_status: newStatus })
-      })
-      
-      if (response.ok) {
-        setPayments(payments.map(payment => 
-          payment.id === paymentId ? { ...payment, paymentStatus: newStatus } : payment
-        ))
-      } else {
-        const data = await response.json()
-        alert('Failed to update payment: ' + (data.error || 'Unknown error'))
-      }
-    } catch (error: any) {
-      console.error('Error updating payment:', error)
-      alert('Failed to update payment status')
-    }
-  }
 
   const handleDeletePayment = async (paymentId: number): Promise<void> => {
     try {
@@ -316,7 +333,7 @@ const Payments: React.FC = () => {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">₹</span>
+                  <CurrencyRupeeIcon className="w-4 h-4 text-white" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
@@ -333,8 +350,8 @@ const Payments: React.FC = () => {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">⏳</span>
+                <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+                  <ClockIcon className="w-4 h-4 text-white" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
@@ -351,8 +368,8 @@ const Payments: React.FC = () => {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-red-500 rounded-md flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">!</span>
+                <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+                  <ExclamationTriangleIcon className="w-4 h-4 text-white" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
@@ -369,8 +386,8 @@ const Payments: React.FC = () => {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">✓</span>
+                <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+                  <CheckCircleIcon className="w-4 h-4 text-white" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
@@ -404,12 +421,12 @@ const Payments: React.FC = () => {
             Paid ({payments.filter(p => p.paymentStatus === 'Paid').length})
           </button>
           <button
-            onClick={() => setFilter('partial')}
+            onClick={() => setFilter('cancelled')}
             className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-              filter === 'partial' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'cancelled' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            Partial ({payments.filter(p => p.paymentStatus === 'Partial').length})
+            Cancelled ({payments.filter(p => p.paymentStatus === 'Cancelled').length})
           </button>
           <button
             onClick={() => setFilter('pending')}
@@ -457,18 +474,20 @@ const Payments: React.FC = () => {
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
                       <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-primary">💰</span>
+                        <CurrencyRupeeIcon className="w-5 h-5 text-primary" />
                       </div>
                     </div>
                     <div className="ml-4">
                       <div className="text-sm font-medium text-gray-900">{payment.customer}</div>
                       <div className="text-sm text-gray-500">{payment.package}</div>
-                      <div className="text-xs text-gray-400">
-                        {getPaymentMethodIcon(payment.paymentMethod)} {formatPaymentMethod(payment.paymentMethod)} • 🆔 Booking #{payment.bookingId}
+                      <div className="text-xs text-gray-400 flex items-center space-x-1">
+                        {getPaymentMethodIcon(payment.paymentMethod)}
+                        <span>{formatPaymentMethod(payment.paymentMethod)}</span>
                       </div>
                       {payment.transactionId && (
-                        <div className="text-xs text-gray-400">
-                          🔗 Transaction: {payment.transactionId}
+                        <div className="text-xs text-gray-400 flex items-center space-x-1">
+                          <LinkIcon className="w-3 h-3" />
+                          <span>Transaction: {payment.transactionId}</span>
                         </div>
                       )}
                     </div>
@@ -483,16 +502,9 @@ const Payments: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    <select
-                      value={payment.paymentStatus}
-                      onChange={(e) => handlePaymentStatusUpdate(payment.id, e.target.value as Payment['paymentStatus'])}
-                      className={`text-xs font-semibold rounded-full border-0 ${getStatusColor(payment.paymentStatus)}`}
-                    >
-                      <option value="Pending">Pending</option>
-                      <option value="Partial">Partial</option>
-                      <option value="Paid">Paid</option>
-                      <option value="Overdue">Overdue</option>
-                    </select>
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(payment.paymentStatus)}`}>
+                      {payment.paymentStatus}
+                    </span>
                     <span className="text-xs text-gray-500">{formatPaymentMethod(payment.paymentMethod)}</span>
                     <button
                       onClick={() => openPaymentDetails(payment)}
@@ -511,9 +523,8 @@ const Payments: React.FC = () => {
                 </div>
                 <div className="mt-2">
                   <p className="text-xs text-gray-400">
-                    {payment.transactionId && `Transaction: ${payment.transactionId} • `}
-                    Due: {payment.dueDate}
-                    {payment.paymentDate && ` • Paid: ${payment.paymentDate}`}
+                    {payment.transactionId && `Transaction: ${payment.transactionId}`}
+                    {payment.paymentDate && ` • Paid: ${new Date(payment.paymentDate).toLocaleDateString()}`}
                   </p>
                 </div>
               </div>
@@ -545,12 +556,18 @@ const Payments: React.FC = () => {
                   <h4 className="font-medium text-gray-900 border-b pb-2">Payment Transaction Details</h4>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Payment Method</label>
-                    <p className="text-sm text-gray-900">{getPaymentMethodIcon(selectedPayment.paymentMethod)} {formatPaymentMethod(selectedPayment.paymentMethod)}</p>
+                    <p className="text-sm text-gray-900 flex items-center space-x-2">
+                      {getPaymentMethodIcon(selectedPayment.paymentMethod)}
+                      <span>{formatPaymentMethod(selectedPayment.paymentMethod)}</span>
+                    </p>
                   </div>
                   {selectedPayment.transactionId && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Transaction ID</label>
-                      <p className="text-sm text-gray-900 font-mono">🔗 {selectedPayment.transactionId}</p>
+                      <p className="text-sm text-gray-900 font-mono flex items-center space-x-2">
+                        <LinkIcon className="w-4 h-4" />
+                        <span>{selectedPayment.transactionId}</span>
+                      </p>
                     </div>
                   )}
                   <div>
@@ -562,16 +579,25 @@ const Payments: React.FC = () => {
                   {selectedPayment.paymentDate && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Payment Date</label>
-                      <p className="text-sm text-gray-900">📅 {selectedPayment.paymentDate}</p>
+                      <p className="text-sm text-gray-900 flex items-center space-x-2">
+                        <CalendarIcon className="w-4 h-4" />
+                        <span>{new Date(selectedPayment.paymentDate).toLocaleDateString()}</span>
+                      </p>
                     </div>
                   )}
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Due Date</label>
-                    <p className="text-sm text-gray-900">📅 {selectedPayment.dueDate}</p>
+                    <p className="text-sm text-gray-900 flex items-center space-x-2">
+                      <CalendarIcon className="w-4 h-4" />
+                      <span>{new Date(selectedPayment.dueDate).toLocaleDateString()}</span>
+                    </p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Booking Reference</label>
-                    <p className="text-sm text-gray-900">🆔 #{selectedPayment.bookingId}</p>
+                    <p className="text-sm text-gray-900 flex items-center space-x-2">
+                      <HashtagIcon className="w-4 h-4" />
+                      <span>#{selectedPayment.bookingId}</span>
+                    </p>
                   </div>
                 </div>
 
@@ -632,7 +658,7 @@ const Payments: React.FC = () => {
                         <div className="flex justify-between items-start">
                           <div>
                             <p className="text-sm font-medium text-gray-900">{vendor.vendor}</p>
-                            <p className="text-xs text-gray-500">Due: {vendor.date}</p>
+                            <p className="text-xs text-gray-500">Due: {new Date(vendor.date).toLocaleDateString()}</p>
                           </div>
                           <div className="text-right">
                             <p className="text-sm font-semibold text-gray-900">₹{vendor.amount}</p>
@@ -657,15 +683,18 @@ const Payments: React.FC = () => {
                   Close
                 </button>
                 {selectedPayment.paymentStatus !== 'Paid' && (
-                  <button className="px-3 py-1.5 bg-gray-600 text-white rounded-md hover:bg-gray-700 text-sm">
-                    💰 Record Payment
+                  <button className="px-3 py-1.5 bg-gray-600 text-white rounded-md hover:bg-gray-700 text-sm flex items-center space-x-1">
+                    <CurrencyRupeeIcon className="w-4 h-4" />
+                    <span>Record Payment</span>
                   </button>
                 )}
-                <button className="px-3 py-1.5 bg-gray-500 text-white rounded-md hover:bg-gray-600 text-sm">
-                  📄 Generate Receipt
+                <button className="px-3 py-1.5 bg-gray-500 text-white rounded-md hover:bg-gray-600 text-sm flex items-center space-x-1">
+                  <ReceiptIcon className="w-4 h-4" />
+                  <span>Generate Receipt</span>
                 </button>
-                <button className="px-3 py-1.5 bg-gray-600 text-white rounded-md hover:bg-gray-700 text-sm">
-                  🔄 Update Payment Status
+                <button className="px-3 py-1.5 bg-gray-600 text-white rounded-md hover:bg-gray-700 text-sm flex items-center space-x-1">
+                  <ArrowPathIcon className="w-4 h-4" />
+                  <span>Update Payment Status</span>
                 </button>
               </div>
             </div>
@@ -690,9 +719,7 @@ const Payments: React.FC = () => {
               
               <div className="text-center">
                 <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                  <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
+                  <TrashIcon className="h-6 w-6 text-red-600" />
                 </div>
                 
                 <h3 className="text-lg font-medium text-gray-900 mb-2">

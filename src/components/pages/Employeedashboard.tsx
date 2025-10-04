@@ -8,6 +8,23 @@ const Employeedashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
   const [employeeDestination, setEmployeeDestination] = useState<string>('')
+  const [employeeId, setEmployeeId] = useState<number | null>(null)
+
+  // Function to update employee active session
+  const updateActiveSession = async () => {
+    if (employeeId) {
+      try {
+        await fetch('/api/employees/active-sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ employeeId })
+        })
+      } catch (error) {
+        console.error('Error updating active session:', error)
+      }
+    }
+  }
+
   const [packages, setPackages] = useState<Array<{
     id: number
     name: string
@@ -86,6 +103,7 @@ const Employeedashboard: React.FC = () => {
             const employeeData = await employeeRes.json()
             const destination = employeeData.destination || ''
             setEmployeeDestination(destination)
+            setEmployeeId(employeeData.id)
             
             // Fetch packages based on destination
             const url = destination && destination !== 'all' ? `/api/packages/city/${destination}` : '/api/packages'
@@ -114,6 +132,57 @@ const Employeedashboard: React.FC = () => {
     }
     fetchEmployeeData()
   }, [user?.email])
+
+  // Set up session tracking when employeeId is available
+  useEffect(() => {
+    if (employeeId) {
+      // Initial session update
+      updateActiveSession()
+      
+      // Set up periodic session updates every 2 minutes
+      const interval = setInterval(updateActiveSession, 120000)
+      
+      // Update session on user activity
+      const handleActivity = () => updateActiveSession()
+      window.addEventListener('mousedown', handleActivity)
+      window.addEventListener('keydown', handleActivity)
+      window.addEventListener('scroll', handleActivity)
+      
+      // Clean up session on page unload (logout, close tab, navigate away)
+      const handleBeforeUnload = async () => {
+        try {
+          await fetch('/api/employees/active-sessions', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ employeeId }),
+            keepalive: true // Ensures request completes even if page is closing
+          })
+        } catch (error) {
+          console.error('Error clearing session on unload:', error)
+        }
+      }
+      
+      window.addEventListener('beforeunload', handleBeforeUnload)
+      
+      return () => {
+        clearInterval(interval)
+        window.removeEventListener('mousedown', handleActivity)
+        window.removeEventListener('keydown', handleActivity)
+        window.removeEventListener('scroll', handleActivity)
+        window.removeEventListener('beforeunload', handleBeforeUnload)
+        
+        // Also clear session when component unmounts
+        if (employeeId) {
+          fetch('/api/employees/active-sessions', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ employeeId }),
+            keepalive: true
+          }).catch(error => console.error('Error clearing session on unmount:', error))
+        }
+      }
+    }
+  }, [employeeId])
 
   // Load locations, hotels, vehicles for name resolution
   useEffect(() => {

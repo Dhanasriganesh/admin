@@ -37,3 +37,12 @@ body {
 .bg-secondary-white { background-color: var(--secondary-white); }
 .text-secondary-black { color: var(--secondary-black); }
 .bg-secondary-black { background-color: var(--secondary-black); }
+
+/* Hide scrollbar but keep scrolling functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar { 
+  display: none;  /* Safari and Chrome */
+}
