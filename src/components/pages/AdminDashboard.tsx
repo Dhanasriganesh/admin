@@ -513,7 +513,7 @@ const AdminDashboard: React.FC = () => {
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Today's Leads</p>
+                <p className="text-sm text-gray-600">Today&apos;s Leads</p>
                 <p className="text-2xl font-bold text-gray-900">{loadingStats ? '...' : Math.floor(dashboardStats.totalLeads * 0.1)}</p>
               </div>
               <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center">

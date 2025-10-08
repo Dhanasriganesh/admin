@@ -12,7 +12,7 @@ const Employeedashboard: React.FC = () => {
   const [employeeId, setEmployeeId] = useState<number | null>(null)
 
   // Function to update employee active session
-  const updateActiveSession = async () => {
+  const updateActiveSession = React.useCallback(async () => {
     if (employeeId) {
       try {
         await fetch('/api/employees/active-sessions', {
@@ -24,7 +24,7 @@ const Employeedashboard: React.FC = () => {
         console.error('Error updating active session:', error)
       }
     }
-  }
+  }, [employeeId])
 
   const [packages, setPackages] = useState<Array<{
     id: number
@@ -183,7 +183,7 @@ const Employeedashboard: React.FC = () => {
         }
       }
     }
-  }, [employeeId])
+  }, [employeeId, updateActiveSession])
 
   // Load locations, hotels, vehicles for name resolution
   useEffect(() => {

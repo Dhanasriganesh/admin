@@ -44,7 +44,7 @@ const Bookings: React.FC = () => {
   // Fetch bookings from API
   useEffect(() => {
     fetchBookings()
-  }, [])
+  }, [fetchBookings])
 
   // Function to automatically determine booking status
   const calculateBookingStatus = (booking: any): 'Pending' | 'Completed' | 'Cancelled' => {
@@ -66,7 +66,7 @@ const Bookings: React.FC = () => {
     }
   }
 
-  const fetchBookings = async () => {
+  const fetchBookings = React.useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch('/api/bookings')
@@ -104,7 +104,7 @@ const Bookings: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   // Filter bookings based on month, year, and date
   const getFilteredBookings = (): Booking[] => {
