@@ -41,11 +41,6 @@ const Bookings: React.FC = () => {
   const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString())
   const [selectedDate, setSelectedDate] = useState<string>('all')
 
-  // Fetch bookings from API
-  useEffect(() => {
-    fetchBookings()
-  }, [fetchBookings])
-
   // Function to automatically determine booking status
   const calculateBookingStatus = (booking: any): 'Pending' | 'Completed' | 'Cancelled' => {
     const paymentStatus = booking.payment_status || booking.paymentStatus || 'Pending'
@@ -105,6 +100,11 @@ const Bookings: React.FC = () => {
       setLoading(false)
     }
   }, [])
+
+  // Fetch bookings from API
+  useEffect(() => {
+    fetchBookings()
+  }, [fetchBookings])
 
   // Filter bookings based on month, year, and date
   const getFilteredBookings = (): Booking[] => {
