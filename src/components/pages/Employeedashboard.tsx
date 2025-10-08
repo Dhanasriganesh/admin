@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import Image from 'next/image'
+import logo from '../../assets/images/logo.png'
 
 const Employeedashboard: React.FC = () => {
   const { user, logout } = useAuth()
@@ -570,17 +571,11 @@ const Employeedashboard: React.FC = () => {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-40 w-56 bg-white shadow-xl transform transition-transform duration-300 ease-in-out md:translate-x-0 ${
+      <div className={`fixed inset-y-0 left-0 z-40 w-56 bg-slate-800 shadow-xl transform transition-transform duration-300 ease-in-out md:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
       }`}>
-        <div className="h-14 border-b border-gray-100 flex items-center px-4">
-          <div className="h-8 w-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-semibold">
-            {user?.name?.charAt(0)?.toUpperCase() || 'E'}
-          </div>
-          <div className="ml-3">
-            <div className="text-xs text-gray-500">Employee</div>
-            <div className="text-sm font-semibold text-gray-900">{user?.name || 'Dashboard'}</div>
-          </div>
+        <div className="h-14 border-b border-gray-600 flex items-center px-4">
+          <Image src={logo} alt="Travloger.in" width={120} height={24} priority />
         </div>
         
         {/* Navigation */}
@@ -588,22 +583,18 @@ const Employeedashboard: React.FC = () => {
           <div className="space-y-1">
             <button
               onClick={() => setActiveSection('itineraries')}
-              className={`w-full flex items-center space-x-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+              className={`w-full flex items-center space-x-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors ${
                 activeSection === 'itineraries'
-                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                  : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  ? 'bg-gray-300 text-gray-800'
+                  : 'text-gray-300 hover:bg-gray-700 hover:text-gray-100'
               }`}
             >
-              <div className={`h-6 w-6 rounded-lg flex items-center justify-center ${
-                activeSection === 'itineraries' ? 'bg-blue-500' : 'bg-gray-400'
-              }`}>
-                <svg className="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
+              <svg className={`h-6 w-6 ${activeSection === 'itineraries' ? 'text-gray-800' : 'text-gray-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
               <span>Itineraries</span>
               {packages.length > 0 && (
-                <span className="ml-auto bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">
+                <span className="ml-auto bg-slate-700 text-gray-200 text-xs px-2 py-0.5 rounded-full">
                   {packages.length}
                 </span>
               )}
@@ -611,22 +602,18 @@ const Employeedashboard: React.FC = () => {
             
             <button
               onClick={() => setActiveSection('leads')}
-              className={`w-full flex items-center space-x-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+              className={`w-full flex items-center space-x-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors ${
                 activeSection === 'leads'
-                  ? 'bg-green-50 text-green-700 border border-green-200'
-                  : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  ? 'bg-gray-300 text-gray-800'
+                  : 'text-gray-300 hover:bg-gray-700 hover:text-gray-100'
               }`}
             >
-              <div className={`h-6 w-6 rounded-lg flex items-center justify-center ${
-                activeSection === 'leads' ? 'bg-green-500' : 'bg-gray-400'
-              }`}>
-                <svg className="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
+              <svg className={`h-6 w-6 ${activeSection === 'leads' ? 'text-gray-800' : 'text-gray-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
               <span>Leads</span>
               {assignedLeads.length > 0 && (
-                <span className="ml-auto bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">
+                <span className="ml-auto bg-slate-700 text-gray-200 text-xs px-2 py-0.5 rounded-full">
                   {assignedLeads.length}
                 </span>
               )}
@@ -634,20 +621,20 @@ const Employeedashboard: React.FC = () => {
           </div>
         </nav>
         
-        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-gray-100">
+        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-gray-600">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="h-7 w-7 bg-primary rounded-full flex items-center justify-center text-white text-xs">
+              <div className="h-7 w-7 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs">
                 {user?.name?.charAt(0)?.toUpperCase() || 'E'}
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">{user?.name || 'Employee'}</p>
-                <p className="text-[11px] text-gray-500">{employeeDestination || 'No destination'}</p>
+                <p className="text-sm font-medium text-gray-200">{user?.name || 'Employee'}</p>
+                <p className="text-[11px] text-gray-400">{employeeDestination || 'No destination'}</p>
               </div>
             </div>
             <button
               onClick={() => setShowLogoutModal(true)}
-              className="text-xs text-red-600 hover:text-red-800 px-2 py-1 rounded hover:bg-red-50"
+              className="text-xs text-red-400 hover:text-red-300 px-2 py-1 rounded hover:bg-red-900/20"
             >
               Logout
             </button>
@@ -658,42 +645,49 @@ const Employeedashboard: React.FC = () => {
       {/* Main */}
       <div className="flex-1 flex flex-col md:ml-56">
         {/* Header */}
-        <header className="bg-white border-b border-gray-100">
-          <div className="h-14 px-4 flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+        <header className="bg-white border-b border-gray-200 shadow-sm">
+          <div className="h-16 px-6 flex items-center justify-between">
+            <div className="flex items-center space-x-4">
               <button 
-                className="md:hidden text-gray-500" 
+                className="md:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors" 
                 onClick={() => setSidebarOpen(s => !s)}
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
-              <h1 className="text-base font-semibold text-gray-900">Employee Dashboard</h1>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Employee Dashboard</h1>
+                <p className="text-sm text-gray-500">Welcome back, {user?.name?.split(' ')[0] || 'Employee'}</p>
+              </div>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="text-sm text-gray-600">
-                Destination: <span className="font-medium">{employeeDestination || 'All'}</span>
-              </div>
-              <div className="relative">
-                <input 
-                  className="pl-3 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" 
-                  placeholder="Search packages..." 
-                />
+              <div className="hidden md:flex items-center space-x-2 px-3 py-2 bg-slate-100 rounded-lg">
+                <svg className="h-4 w-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span className="text-sm font-medium text-slate-800">{employeeDestination || 'All Locations'}</span>
               </div>
               <button
                 onClick={() => setShowLogoutModal(true)}
-                className="h-7 w-7 bg-primary rounded-full flex items-center justify-center text-white text-xs hover:opacity-80 transition-opacity"
+                className="flex items-center space-x-3 hover:bg-gray-50 rounded-lg px-3 py-2 transition-colors"
               >
-                {user?.name?.charAt(0)?.toUpperCase() || 'E'}
+                <div className="h-10 w-10 bg-slate-800 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                  {user?.name?.split(' ').map(n => n.charAt(0)).join('').slice(0, 2).toUpperCase() || 'EM'}
+                </div>
+                <div className="hidden lg:block text-left">
+                  <p className="text-sm font-semibold text-gray-900">{user?.name || 'Employee'}</p>
+                  <p className="text-xs text-gray-500">{user?.email || ''}</p>
+                </div>
               </button>
             </div>
           </div>
         </header>
 
         {/* Content */}
-        <main className="p-4">
-          <div className="w-full">
+        <main className="flex-1 overflow-y-auto bg-gray-50 p-6">
+          <div className="max-w-7xl mx-auto">
             {/* Payment Page */}
             {showPaymentPage && selectedLead && selectedItinerary ? (
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -1154,24 +1148,24 @@ const Employeedashboard: React.FC = () => {
               <>
                 {/* Itineraries Section */}
                 {activeSection === 'itineraries' && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-100">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="px-6 py-5 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-gray-200">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="h-8 w-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                        <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="flex items-center space-x-4">
+                      <div className="h-12 w-12 bg-slate-800 rounded-xl flex items-center justify-center shadow-sm">
+                        <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                       </div>
                       <div>
-                        <h2 className="text-lg font-semibold text-gray-900">Travel Itineraries</h2>
+                        <h2 className="text-xl font-bold text-gray-900">Travel Itineraries</h2>
                         <p className="text-sm text-gray-600">Manage and view all available packages</p>
                       </div>
                     </div>
                     {loading && (
-                      <div className="flex items-center space-x-2 text-sm text-gray-500">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-                        <span>Loading...</span>
+                      <div className="flex items-center space-x-2 px-4 py-2 bg-white rounded-lg shadow-sm">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-slate-800"></div>
+                        <span className="text-sm font-medium text-gray-700">Loading...</span>
                       </div>
                     )}
                   </div>
@@ -1400,22 +1394,22 @@ const Employeedashboard: React.FC = () => {
 
             {/* Leads Section */}
             {activeSection === 'leads' && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-100">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="px-6 py-5 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-gray-200">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="h-8 w-8 bg-green-500 rounded-lg flex items-center justify-center">
-                        <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="flex items-center space-x-4">
+                      <div className="h-12 w-12 bg-slate-800 rounded-xl flex items-center justify-center shadow-sm">
+                        <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                       </div>
                       <div>
-                        <h2 className="text-lg font-semibold text-gray-900">Assigned Leads</h2>
+                        <h2 className="text-xl font-bold text-gray-900">Assigned Leads</h2>
                         <p className="text-sm text-gray-600">Manage your customer inquiries and bookings</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-1 rounded-full">
+                      <span className="bg-slate-800 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-sm">
                         {assignedLeads.length} Lead{assignedLeads.length !== 1 ? 's' : ''}
                       </span>
                     </div>

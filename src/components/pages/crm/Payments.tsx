@@ -170,20 +170,11 @@ const Payments: React.FC = () => {
   })
 
   const getStatusColor = (status: string): string => {
-    switch (status) {
-      case 'Paid': return 'bg-primary/10 text-primary'
-      case 'Pending': return 'bg-yellow-100 text-yellow-800'
-      case 'Cancelled': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
+    return 'bg-slate-100 text-slate-800'
   }
 
   const getVendorStatusColor = (status: string): string => {
-    switch (status) {
-      case 'Paid': return 'bg-primary/10 text-primary'
-      case 'Pending': return 'bg-yellow-100 text-yellow-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
+    return 'bg-slate-100 text-slate-800'
   }
 
   const getPaymentMethodIcon = (method: string): React.ReactNode => {
@@ -332,14 +323,14 @@ const Payments: React.FC = () => {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+                <div className="w-8 h-8 bg-slate-800 rounded-md flex items-center justify-center">
                   <CurrencyRupeeIcon className="w-4 h-4 text-white" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total Revenue</dt>
-                  <dd className="text-lg font-medium text-gray-900">₹{totalRevenue.toLocaleString()}</dd>
+                  <dt className="text-sm font-medium text-slate-800 truncate">Total Revenue</dt>
+                  <dd className="text-lg font-medium text-slate-800">₹{totalRevenue.toLocaleString()}</dd>
                 </dl>
               </div>
             </div>
@@ -350,14 +341,14 @@ const Payments: React.FC = () => {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+                <div className="w-8 h-8 bg-slate-800 rounded-md flex items-center justify-center">
                   <ClockIcon className="w-4 h-4 text-white" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Pending Amount</dt>
-                  <dd className="text-lg font-medium text-gray-900">₹{pendingAmount.toLocaleString()}</dd>
+                  <dt className="text-sm font-medium text-slate-800 truncate">Pending Amount</dt>
+                  <dd className="text-lg font-medium text-slate-800">₹{pendingAmount.toLocaleString()}</dd>
                 </dl>
               </div>
             </div>
@@ -368,14 +359,14 @@ const Payments: React.FC = () => {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+                <div className="w-8 h-8 bg-slate-800 rounded-md flex items-center justify-center">
                   <ExclamationTriangleIcon className="w-4 h-4 text-white" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Overdue</dt>
-                  <dd className="text-lg font-medium text-gray-900">{overduePayments.length}</dd>
+                  <dt className="text-sm font-medium text-slate-800 truncate">Overdue</dt>
+                  <dd className="text-lg font-medium text-slate-800">{overduePayments.length}</dd>
                 </dl>
               </div>
             </div>
@@ -386,14 +377,14 @@ const Payments: React.FC = () => {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+                <div className="w-8 h-8 bg-slate-800 rounded-md flex items-center justify-center">
                   <CheckCircleIcon className="w-4 h-4 text-white" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Paid</dt>
-                  <dd className="text-lg font-medium text-gray-900">{payments.filter(p => p.paymentStatus === 'Paid').length}</dd>
+                  <dt className="text-sm font-medium text-slate-800 truncate">Paid</dt>
+                  <dd className="text-lg font-medium text-slate-800">{payments.filter(p => p.paymentStatus === 'Paid').length}</dd>
                 </dl>
               </div>
             </div>
@@ -407,7 +398,7 @@ const Payments: React.FC = () => {
           <button
             onClick={() => setFilter('all')}
             className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-              filter === 'all' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'all' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             All ({payments.length})
@@ -415,7 +406,7 @@ const Payments: React.FC = () => {
           <button
             onClick={() => setFilter('paid')}
             className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-              filter === 'paid' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'paid' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Paid ({payments.filter(p => p.paymentStatus === 'Paid').length})
@@ -423,7 +414,7 @@ const Payments: React.FC = () => {
           <button
             onClick={() => setFilter('cancelled')}
             className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-              filter === 'cancelled' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'cancelled' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Cancelled ({payments.filter(p => p.paymentStatus === 'Cancelled').length})
@@ -431,7 +422,7 @@ const Payments: React.FC = () => {
           <button
             onClick={() => setFilter('pending')}
             className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-              filter === 'pending' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'pending' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Pending ({payments.filter(p => p.paymentStatus === 'Pending').length})
@@ -442,7 +433,7 @@ const Payments: React.FC = () => {
       {/* Loading State */}
       {loading && (
         <div className="bg-white shadow rounded-lg p-8 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-800 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading payments...</p>
         </div>
       )}
@@ -466,71 +457,81 @@ const Payments: React.FC = () => {
               <p className="text-sm">Payments will appear here once customers make payments.</p>
             </div>
           ) : (
-            <ul className="divide-y divide-gray-200">
-              {filteredPayments.map((payment) => (
-            <li key={payment.id}>
-              <div className="px-4 py-4 sm:px-6 hover:bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
-                        <CurrencyRupeeIcon className="w-5 h-5 text-primary" />
-                      </div>
-                    </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">{payment.customer}</div>
-                      <div className="text-sm text-gray-500">{payment.package}</div>
-                      <div className="text-xs text-gray-400 flex items-center space-x-1">
-                        {getPaymentMethodIcon(payment.paymentMethod)}
-                        <span>{formatPaymentMethod(payment.paymentMethod)}</span>
-                      </div>
-                      {payment.transactionId && (
-                        <div className="text-xs text-gray-400 flex items-center space-x-1">
-                          <LinkIcon className="w-3 h-3" />
-                          <span>Transaction: {payment.transactionId}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="text-right">
-                      <div className="text-sm font-semibold text-gray-900">₹{payment.amount.toLocaleString()}</div>
-                      <div className="text-xs text-gray-500">
-                        Paid: ₹{payment.paidAmount.toLocaleString()}
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Package</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paid</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaction ID</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredPayments.map((payment) => (
+                    <tr key={payment.id} className="hover:bg-gray-50">
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <div className="text-xs font-medium text-gray-900">{payment.customer}</div>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <div className="text-xs text-gray-900">{payment.package}</div>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-900">
+                        ₹{payment.amount.toLocaleString()}
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-900">
+                        ₹{payment.paidAmount.toLocaleString()}
                         {payment.remainingAmount > 0 && (
-                          <span className="text-red-500"> • Due: ₹{payment.remainingAmount.toLocaleString()}</span>
+                          <div className="text-red-500">Due: ₹{payment.remainingAmount.toLocaleString()}</div>
                         )}
-                      </div>
-                    </div>
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(payment.paymentStatus)}`}>
-                      {payment.paymentStatus}
-                    </span>
-                    <span className="text-xs text-gray-500">{formatPaymentMethod(payment.paymentMethod)}</span>
-                    <button
-                      onClick={() => openPaymentDetails(payment)}
-                      className="text-primary hover:opacity-80 text-sm font-medium"
-                    >
-                      View Details
-                    </button>
-                    <button
-                      onClick={() => openDeleteModal(payment)}
-                      className="text-red-500 hover:text-red-600 text-xs font-medium"
-                      title="Delete Payment Record"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-                <div className="mt-2">
-                  <p className="text-xs text-gray-400">
-                    {payment.transactionId && `Transaction: ${payment.transactionId}`}
-                    {payment.paymentDate && ` • Paid: ${new Date(payment.paymentDate).toLocaleDateString()}`}
-                  </p>
-                </div>
-              </div>
-            </li>
-              ))}
-            </ul>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <span className={`inline-flex px-1.5 py-0.5 text-xs font-semibold rounded-full ${getStatusColor(payment.paymentStatus)}`}>
+                          {payment.paymentStatus}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <div className="flex items-center space-x-1">
+                          {getPaymentMethodIcon(payment.paymentMethod)}
+                          <span className="text-xs text-gray-900">{formatPaymentMethod(payment.paymentMethod)}</span>
+                        </div>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <div className="text-xs text-gray-500">
+                          {payment.transactionId ? (
+                            <div className="flex items-center space-x-1">
+                              <LinkIcon className="w-3 h-3" />
+                              <span className="truncate max-w-20">{payment.transactionId}</span>
+                            </div>
+                          ) : (
+                            'N/A'
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap text-xs font-medium">
+                        <button
+                          onClick={() => openPaymentDetails(payment)}
+                          className="text-slate-800 hover:opacity-80 mr-3"
+                        >
+                          View Details
+                        </button>
+                        <button
+                          onClick={() => openDeleteModal(payment)}
+                          className="text-red-500 hover:text-red-600"
+                          title="Delete Payment Record"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}

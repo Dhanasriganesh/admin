@@ -132,22 +132,11 @@ const Bookings: React.FC = () => {
   })
 
   const getStatusColor = (status: string): string => {
-    switch (status) {
-      case 'Pending': return 'bg-yellow-100 text-yellow-800'
-      case 'Completed': return 'bg-green-100 text-green-800'
-      case 'Cancelled': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
+    return 'bg-slate-100 text-slate-800'
   }
 
   const getPaymentStatusColor = (status: string): string => {
-    switch (status) {
-      case 'Paid': return 'bg-primary/10 text-primary'
-      case 'Partial': return 'bg-yellow-100 text-yellow-800'
-      case 'Pending': return 'bg-orange-100 text-orange-800'
-      case 'Refunded': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
+    return 'bg-slate-100 text-slate-800'
   }
 
 
@@ -271,7 +260,7 @@ const Bookings: React.FC = () => {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+                <div className="w-8 h-8 bg-slate-800 rounded-md flex items-center justify-center">
                   <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                   </svg>
@@ -279,8 +268,8 @@ const Bookings: React.FC = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total Bookings</dt>
-                  <dd className="text-lg font-medium text-gray-900">{bookings.length}</dd>
+                  <dt className="text-sm font-medium text-slate-800 truncate">Total Bookings</dt>
+                  <dd className="text-lg font-medium text-slate-800">{bookings.length}</dd>
                 </dl>
               </div>
             </div>
@@ -291,7 +280,7 @@ const Bookings: React.FC = () => {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+                <div className="w-8 h-8 bg-slate-800 rounded-md flex items-center justify-center">
                   <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
@@ -299,8 +288,8 @@ const Bookings: React.FC = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Completed</dt>
-                  <dd className="text-lg font-medium text-gray-900">{bookings.filter(b => b.status === 'Completed').length}</dd>
+                  <dt className="text-sm font-medium text-slate-800 truncate">Completed</dt>
+                  <dd className="text-lg font-medium text-slate-800">{bookings.filter(b => b.status === 'Completed').length}</dd>
                 </dl>
               </div>
             </div>
@@ -311,7 +300,7 @@ const Bookings: React.FC = () => {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+                <div className="w-8 h-8 bg-slate-800 rounded-md flex items-center justify-center">
                   <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                   </svg>
@@ -319,8 +308,8 @@ const Bookings: React.FC = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Pending</dt>
-                  <dd className="text-lg font-medium text-gray-900">{bookings.filter(b => b.status === 'Pending').length}</dd>
+                  <dt className="text-sm font-medium text-slate-800 truncate">Pending</dt>
+                  <dd className="text-lg font-medium text-slate-800">{bookings.filter(b => b.status === 'Pending').length}</dd>
                 </dl>
               </div>
             </div>
@@ -331,7 +320,7 @@ const Bookings: React.FC = () => {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+                <div className="w-8 h-8 bg-slate-800 rounded-md flex items-center justify-center">
                   <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -339,8 +328,8 @@ const Bookings: React.FC = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total Revenue</dt>
-                  <dd className="text-lg font-medium text-gray-900">₹{totalRevenue.toLocaleString()}</dd>
+                  <dt className="text-sm font-medium text-slate-800 truncate">Total Revenue</dt>
+                  <dd className="text-lg font-medium text-slate-800">₹{totalRevenue.toLocaleString()}</dd>
                 </dl>
               </div>
             </div>
@@ -354,7 +343,7 @@ const Bookings: React.FC = () => {
           <button
             onClick={() => setFilter('all')}
             className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-              filter === 'all' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'all' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             All ({bookings.length})
@@ -362,7 +351,7 @@ const Bookings: React.FC = () => {
           <button
             onClick={() => setFilter('pending')}
             className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-              filter === 'pending' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'pending' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Pending ({bookings.filter(b => b.status === 'Pending').length})
@@ -370,7 +359,7 @@ const Bookings: React.FC = () => {
           <button
             onClick={() => setFilter('completed')}
             className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-              filter === 'completed' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'completed' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Completed ({bookings.filter(b => b.status === 'Completed').length})
@@ -378,7 +367,7 @@ const Bookings: React.FC = () => {
           <button
             onClick={() => setFilter('cancelled')}
             className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-              filter === 'cancelled' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'cancelled' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Cancelled ({bookings.filter(b => b.status === 'Cancelled').length})
@@ -389,7 +378,7 @@ const Bookings: React.FC = () => {
       {/* Loading State */}
       {loading && (
         <div className="bg-white shadow rounded-lg p-8 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-800 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading bookings...</p>
         </div>
       )}
@@ -413,82 +402,72 @@ const Bookings: React.FC = () => {
               <p className="text-sm">Bookings will appear here once customers make payments.</p>
             </div>
           ) : (
-            <ul className="divide-y divide-gray-200">
-              {filteredBookings.map((booking) => (
-            <li key={booking.id}>
-              <div className="px-4 py-4 sm:px-6 hover:bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
-                        <span className="text-primary font-semibold text-sm">
-                          {booking.customer?.charAt(0)?.toUpperCase() || 'B'}
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Package</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destination</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredBookings.map((booking) => (
+                    <tr key={booking.id} className="hover:bg-gray-50">
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <div className="text-xs font-medium text-gray-900">{booking.customer || 'N/A'}</div>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <div className="text-xs text-gray-900">{booking.email || 'N/A'}</div>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <div className="text-xs text-gray-900">{booking.phone || 'N/A'}</div>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <div className="text-xs text-gray-900">{booking.package || 'N/A'}</div>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <span className={`inline-flex px-1.5 py-0.5 text-xs font-semibold rounded-full ${getStatusColor(booking.destination)}`}>
+                          {booking.destination || 'Unknown'}
                         </span>
-                      </div>
-                    </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">{booking.customer}</div>
-                      <div className="text-sm text-gray-500">{booking.package}</div>
-                      <div className="text-xs text-gray-400 flex items-center">
-                        <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        {booking.destination} • 
-                        <svg className="h-3 w-3 mx-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        {booking.duration} • 
-                        <svg className="h-3 w-3 mx-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        {booking.travelers} travelers
-                      </div>
-                      {booking.email && (
-                        <div className="text-xs text-gray-400 flex items-center mt-1">
-                          <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                          </svg>
-                          {booking.email}
-                        </div>
-                      )}
-                      {booking.phone && (
-                        <div className="text-xs text-gray-400 flex items-center">
-                          <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                          </svg>
-                          {booking.phone}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="text-right">
-                      <div className="text-sm font-semibold text-gray-900">₹{booking.amount.toLocaleString()}</div>
-                      <div className="text-xs text-gray-500">Travel: {booking.travelDate ? new Date(booking.travelDate).toLocaleDateString() : 'N/A'}</div>
-                    </div>
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(booking.status)}`}>
-                      {booking.status}
-                    </span>
-                    <button
-                      onClick={() => openBookingDetails(booking)}
-                      className="text-primary hover:opacity-80 text-sm font-medium"
-                    >
-                      View Details
-                    </button>
-                    <button
-                      onClick={() => openDeleteModal(booking)}
-                      className="text-red-500 hover:text-red-600 text-xs font-medium"
-                      title="Delete Booking Record"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </li>
-              ))}
-            </ul>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-900">
+                        ₹{booking.amount.toLocaleString()}
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <span className={`inline-flex px-1.5 py-0.5 text-xs font-semibold rounded-full ${getStatusColor(booking.status)}`}>
+                          {booking.status}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
+                        {new Date(booking.bookingDate).toLocaleDateString()}
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap text-xs font-medium">
+                        <button
+                          onClick={() => openBookingDetails(booking)}
+                          className="text-slate-800 hover:opacity-80 mr-3"
+                        >
+                          View Details
+                        </button>
+                        <button
+                          onClick={() => openDeleteModal(booking)}
+                          className="text-red-500 hover:text-red-600"
+                          title="Delete Booking Record"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}
@@ -498,7 +477,7 @@ const Bookings: React.FC = () => {
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-3">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
             {/* Header */}
-            <div className="bg-primary px-4 py-3">
+            <div className="bg-slate-800 px-4 py-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
@@ -550,7 +529,7 @@ const Bookings: React.FC = () => {
               {/* Contact Information */}
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-gray-900 flex items-center space-x-1">
-                  <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
                   <span>Contact Information</span>
@@ -559,7 +538,7 @@ const Bookings: React.FC = () => {
                   {selectedBooking.email && (
                     <div className="bg-white border border-gray-200 rounded-lg p-3">
                       <div className="flex items-center space-x-2 mb-1">
-                        <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         <span className="text-xs font-medium text-gray-700">Email</span>
@@ -570,7 +549,7 @@ const Bookings: React.FC = () => {
                   {selectedBooking.phone && (
                     <div className="bg-white border border-gray-200 rounded-lg p-3">
                       <div className="flex items-center space-x-2 mb-1">
-                        <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                         </svg>
                         <span className="text-xs font-medium text-gray-700">Phone</span>
@@ -584,7 +563,7 @@ const Bookings: React.FC = () => {
               {/* Travel Information */}
                 <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-gray-900 flex items-center space-x-1">
-                  <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
@@ -593,7 +572,7 @@ const Bookings: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-white border border-gray-200 rounded-lg p-3">
                     <div className="flex items-center space-x-2 mb-1">
-                      <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                       </svg>
                       <span className="text-xs font-medium text-gray-700">Package</span>
@@ -602,7 +581,7 @@ const Bookings: React.FC = () => {
                 </div>
                   <div className="bg-white border border-gray-200 rounded-lg p-3">
                     <div className="flex items-center space-x-2 mb-1">
-                      <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                       </svg>
                       <span className="text-xs font-medium text-gray-700">Travelers</span>
@@ -611,7 +590,7 @@ const Bookings: React.FC = () => {
                   </div>
                   <div className="bg-white border border-gray-200 rounded-lg p-3">
                     <div className="flex items-center space-x-2 mb-1">
-                      <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <span className="text-xs font-medium text-gray-700">Duration</span>
@@ -620,7 +599,7 @@ const Bookings: React.FC = () => {
                 </div>
                   <div className="bg-white border border-gray-200 rounded-lg p-3">
                     <div className="flex items-center space-x-2 mb-1">
-                      <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                       <span className="text-xs font-medium text-gray-700">Travel Date</span>
@@ -633,7 +612,7 @@ const Bookings: React.FC = () => {
               {/* Financial & Status Information */}
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-gray-900 flex items-center space-x-1">
-                  <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <span>Financial & Status</span>
@@ -641,7 +620,7 @@ const Bookings: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-white border border-gray-200 rounded-lg p-3">
                     <div className="flex items-center space-x-2 mb-1">
-                      <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <span className="text-xs font-medium text-gray-700">Total Amount</span>
@@ -650,7 +629,7 @@ const Bookings: React.FC = () => {
                 </div>
                   <div className="bg-white border border-gray-200 rounded-lg p-3">
                     <div className="flex items-center space-x-2 mb-1">
-                      <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <span className="text-xs font-medium text-gray-700">Payment Status</span>
@@ -662,7 +641,7 @@ const Bookings: React.FC = () => {
                 </div>
                 <div className="bg-white border border-gray-200 rounded-lg p-3">
                   <div className="flex items-center space-x-2 mb-1">
-                    <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                     <span className="text-xs font-medium text-gray-700">Assigned Agent</span>
@@ -673,7 +652,7 @@ const Bookings: React.FC = () => {
             </div>
 
             {/* Footer */}
-            <div className="bg-primary/5 px-4 py-3 border-t border-primary/20">
+            <div className="bg-slate-100 px-4 py-3 border-t border-slate-200">
               <div className="flex justify-end space-x-2">
                 <button
                   onClick={() => setShowModal(false)}

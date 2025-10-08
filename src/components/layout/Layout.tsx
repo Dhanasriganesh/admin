@@ -64,20 +64,10 @@ const navigationSections: NavigationSection[] = [
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false)
-  const [searchQuery, setSearchQuery] = useState<string>('')
   const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false)
   const location = useLocation()
   const navigate = useNavigate()
   const { user, logout, isAuthenticated } = useAuth()
-
-  // Search functionality
-  const handleSearch = (query: string) => {
-    setSearchQuery(query)
-    // Pass search query to children components
-    if (window.dispatchEvent) {
-      window.dispatchEvent(new CustomEvent('searchQuery', { detail: query }))
-    }
-  }
 
   // Handle logout
   const handleLogout = () => {
@@ -108,25 +98,30 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 bg-white shadow-xl transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col ${
+      <div className={`fixed inset-y-0 left-0 z-50 transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } ${sidebarCollapsed ? 'w-16' : 'w-56'}`}>
+      } ${sidebarCollapsed ? 'w-20 bg-slate-800' : 'w-56 bg-slate-800 shadow-xl'}`}>
         {/* Logo Section */}
-        <div className="flex items-center justify-between h-14 px-3 py-2 border-b border-gray-100">
+        <div className={`flex items-center justify-between h-14 px-3 py-2 border-b ${
+          sidebarCollapsed ? 'bg-slate-800 border-gray-600' : 'bg-slate-800 border-gray-600'
+        }`}>
           {!sidebarCollapsed && (
-            <Link to="/" className="relative inline-flex items-center px-2 py-1 rounded-md">
-              <div className="absolute inset-0 rounded-md" style={{ backgroundColor: '#00A896' }} />
-              <Image src={logo} alt="Travloger.in" width={120} height={24} priority className="relative z-10" />
+            <Link to="/" className="inline-flex items-center px-2 py-1">
+              <Image src={logo} alt="Travloger.in" width={120} height={24} priority />
             </Link>
           )}
           {sidebarCollapsed && (
-            <div className="w-8 h-8 rounded-md flex items-center justify-center" style={{ backgroundColor: '#00A896' }}>
-              <span className="text-white text-xs font-bold">T</span>
+            <div className="flex items-center justify-center w-full">
+              <span className="text-gray-200 text-[10px] font-medium">travloger</span>
             </div>
           )}
-          <div className="flex items-center space-x-1">
+          <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'space-x-1'}`}>
             <button
-              className="hidden lg:block p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+              className={`hidden lg:block p-1.5 rounded-md transition-colors ${
+                sidebarCollapsed 
+                  ? 'text-gray-300 hover:text-gray-100 hover:bg-gray-700' 
+                  : 'text-gray-300 hover:text-gray-100 hover:bg-gray-700'
+              }`}
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             >
               {sidebarCollapsed ? (
@@ -145,74 +140,84 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 mt-4 px-3">
-          <div className="space-y-1">
+        <nav className={`flex-1 flex flex-col ${sidebarCollapsed ? 'px-2 py-4' : 'px-3 py-4'}`}>
+          <div className="flex flex-col justify-evenly flex-1">
             {navigationSections.map((section, idx) => (
-              <div key={idx}>
+              <React.Fragment key={idx}>
                 {section.title && !sidebarCollapsed && (
-                  <div className="px-3 pt-4 pb-2 text-[11px] font-semibold tracking-wide text-gray-400 uppercase">
+                  <div className="px-3 pb-2 text-[11px] font-semibold tracking-wide text-gray-400 uppercase">
                     {section.title}
                   </div>
                 )}
-                <div className="space-y-0.5">
-                  {section.items.map((item) => {
-                    const isActive = location.pathname === item.href
-                    return (
-                      <Link
-                        key={item.name}
-                        to={item.href}
-                        onClick={() => {
-                          // Close mobile sidebar when navigation item is clicked
-                          if (window.innerWidth < 1024) {
-                            setSidebarOpen(false)
-                          }
-                        }}
-                        className={`group flex items-center px-3 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 relative ${
-                          isActive
-                            ? 'bg-blue-50 text-blue-600'
-                            : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                        }`}
-                        title={sidebarCollapsed ? item.name : undefined}
-                      >
-                        {/* Active indicator line */}
-                        {isActive && !sidebarCollapsed && (
-                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-600 rounded-r-full"></div>
-                        )}
-                        
-                        <item.icon className={`h-5 w-5 flex-shrink-0 ${
-                          isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
-                        } ${sidebarCollapsed ? '' : 'mr-3'}`} />
-                        {!sidebarCollapsed && (
-                          <span className="truncate">{item.name}</span>
-                        )}
-                      </Link>
-                    )
-                  })}
-                </div>
-              </div>
+                {section.items.map((item) => {
+                  const isActive = location.pathname === item.href
+                  return (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      onClick={() => {
+                        // Close mobile sidebar when navigation item is clicked
+                        if (window.innerWidth < 1024) {
+                          setSidebarOpen(false)
+                        }
+                      }}
+                      className={`group flex items-center transition-all duration-200 relative ${
+                        sidebarCollapsed 
+                          ? `justify-center p-3 ${isActive ? 'bg-gray-300 rounded-lg' : ''}`
+                          : `px-3 py-2.5 text-sm font-semibold rounded-lg ${
+                              isActive
+                                ? 'bg-gray-300 text-gray-800'
+                                : 'text-gray-300 hover:bg-gray-700 hover:text-gray-100'
+                            }`
+                      }`}
+                      title={sidebarCollapsed ? item.name : undefined}
+                    >
+                      {/* Active indicator line for expanded sidebar */}
+                      {isActive && !sidebarCollapsed && (
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-600 rounded-r-full"></div>
+                      )}
+                      
+                      <item.icon className={`flex-shrink-0 ${
+                        sidebarCollapsed 
+                          ? 'h-7 w-7' + (isActive ? ' text-gray-700' : ' text-gray-300')
+                          : 'h-6 w-6' + (isActive ? ' text-gray-800' : ' text-gray-300 group-hover:text-gray-100')
+                      } ${sidebarCollapsed ? '' : 'mr-3'}`} />
+                      {!sidebarCollapsed && (
+                        <span className="truncate">{item.name}</span>
+                      )}
+                    </Link>
+                  )
+                })}
+              </React.Fragment>
             ))}
           </div>
         </nav>
 
         {/* User Profile Section */}
-        <div className="flex-shrink-0 p-2 border-t border-gray-100">
+        <div className={`flex-shrink-0 border-t ${
+          sidebarCollapsed ? 'p-2 border-gray-600' : 'p-2 border-gray-600'
+        }`}>
           <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'space-x-2'}`}>
-            <div className="h-7 w-7 bg-primary rounded-full flex items-center justify-center">
-              <span className="text-white text-xs font-medium">
+            <div className={`rounded-full flex items-center justify-center ${
+              sidebarCollapsed ? 'h-8 w-8 bg-gray-600' : 'h-7 w-7 bg-primary'
+            }`}>
+              <span className={`text-white font-medium ${
+                sidebarCollapsed ? 'text-sm' : 'text-xs'
+              }`}>
                 {user?.name?.charAt(0).toUpperCase() || 'U'}
               </span>
             </div>
             {!sidebarCollapsed && (
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium text-gray-900 truncate">{user?.name || 'User'}</p>
-                <p className="text-[10px] text-gray-500 truncate capitalize">{user?.role || 'User'}</p>
+                <p className="text-xs font-medium text-gray-200 truncate">{user?.name || 'User'}</p>
+                <p className="text-[10px] text-gray-400 truncate capitalize">{user?.role || 'User'}</p>
               </div>
             )}
           </div>
           {!sidebarCollapsed && (
             <button
               onClick={() => setShowLogoutModal(true)}
-              className="w-full mt-2 px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
+              className="w-full mt-2 px-2 py-1 text-xs text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded transition-colors"
             >
               Sign out
             </button>
@@ -232,49 +237,27 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <ChevronRightIcon className="h-5 w-5" />
             </button>
             
-            <div className="flex items-center justify-between w-full gap-4">
-              {/* Left side - Search Bar */}
-              <div className="relative flex-1 max-w-md">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
+            <div className="flex items-center justify-end w-full gap-4">
+              {/* User Profile with Avatar and Info */}
+              <button 
+                onClick={() => setShowLogoutModal(true)}
+                className="flex items-center space-x-3 hover:bg-gray-50 rounded-lg px-3 py-2 transition-colors"
+                title="Click to logout"
+              >
+                <div className="h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-gray-700 text-sm font-semibold">
+                    {user?.name?.split(' ').map(n => n.charAt(0)).join('').slice(0, 2).toUpperCase() || 'AD'}
+                  </span>
                 </div>
-                <input
-                  type="text"
-                  placeholder="Search sections, content, and more..."
-                  value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="block w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
-                />
-              </div>
-              
-              {/* Right side */}
-              <div className="flex items-center space-x-4">
-                {/* Notifications Bell Icon */}
-                
-                
-                {/* User Profile with Avatar and Info */}
-                <button 
-                  onClick={() => setShowLogoutModal(true)}
-                  className="flex items-center space-x-3 hover:bg-gray-50 rounded-lg px-3 py-2 transition-colors"
-                  title="Click to logout"
-                >
-                  <div className="h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-gray-700 text-sm font-semibold">
-                      {user?.name?.split(' ').map(n => n.charAt(0)).join('').slice(0, 2).toUpperCase() || 'AD'}
-                    </span>
-                  </div>
-                  <div className="text-left">
-                    <p className="text-sm font-semibold text-gray-900">
-                      {user?.name || 'Admin User'}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {user?.email || 'admin@travloger.com'}
-                    </p>
-                  </div>
-                </button>
-              </div>
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-gray-900">
+                    {user?.name || 'Admin User'}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {user?.email || 'admin@travloger.com'}
+                  </p>
+                </div>
+              </button>
             </div>
           </div>
         </header>

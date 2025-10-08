@@ -4,14 +4,12 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
-
   try {
     // Create employee_sessions table using direct SQL
     const { error: createError } = await supabaseServer
       .from('employee_sessions')
       .select('id')
       .limit(1)
-
     // If table doesn't exist, create it
     if (createError && createError.code === 'PGRST116') {
       // Table doesn't exist, we need to create it via SQL

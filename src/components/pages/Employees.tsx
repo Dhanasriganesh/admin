@@ -507,7 +507,7 @@ const Employees: React.FC = () => {
                   fetchEmployees()
                 }}
                 disabled={loadingActiveStatus}
-                className="h-9 px-3 py-1 text-sm bg-primary text-white rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="h-9 px-3 py-1 text-sm bg-slate-800 text-white rounded-md hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 <svg className={`h-4 w-4 ${loadingActiveStatus ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -525,7 +525,7 @@ const Employees: React.FC = () => {
                     console.error('Error cleaning up sessions:', error)
                   }
                 }}
-                className="h-9 px-3 py-1 text-sm bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-colors flex items-center gap-2"
+                className="h-9 px-3 py-1 text-sm bg-slate-800 text-white rounded-md hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500/20 transition-colors flex items-center gap-2"
               >
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -553,7 +553,7 @@ const Employees: React.FC = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-slate-800 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors"
                 >
                   <svg className="-ml-1 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -569,74 +569,89 @@ const Employees: React.FC = () => {
         {/* Employee List */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           {getFilteredEmployees().length > 0 ? (
-            <div className="divide-y divide-gray-200">
-              {getFilteredEmployees().map((emp) => (
-                <div key={emp.id} className="p-6 hover:bg-gray-50/50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div 
-                      className="flex items-center space-x-4 cursor-pointer flex-1"
-                      onClick={() => openProfileModal(emp)}
-                      title="Click to view employee profile and work statistics"
-                    >
-                      <div className="flex-shrink-0">
-                        <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                          <span className="text-primary font-semibold text-lg">
-                            {emp.name.split(' ').map(n => n[0]).join('')}
-                          </span>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destination</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {getFilteredEmployees().map((emp) => (
+                    <tr key={emp.id} className="hover:bg-gray-50">
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <div className="text-xs font-medium text-gray-900 cursor-pointer" onClick={() => openProfileModal(emp)} title="Click to view employee profile and work statistics">
+                          {emp.name}
                         </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-2">
-                          <h3 className="text-base font-semibold text-gray-900 truncate">{emp.name}</h3>
-                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                            activeEmployeeIds.includes(emp.id)
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
-                            {activeEmployeeIds.includes(emp.id) ? 'Active' : 'Offline'}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-600 mt-1">{emp.email}</p>
-                        <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
-                          <div className="flex items-center space-x-1">
-                            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <span>{emp.destination}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            <span className="capitalize">{emp.role}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleEditEmployee(emp)
-                        }}
-                        className="px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/10 rounded-md transition-colors"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          openDeleteModal(emp)
-                        }}
-                        className="px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <div className="text-xs text-gray-900">{emp.email}</div>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <div className="text-xs text-gray-900">{emp.phone}</div>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <span className="inline-flex px-1.5 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-800">
+                          {emp.destination}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <span className="inline-flex px-1.5 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-800 capitalize">
+                          {emp.role}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <span className={`inline-flex px-1.5 py-0.5 text-xs font-semibold rounded-full ${
+                          activeEmployeeIds.includes(emp.id)
+                            ? 'bg-slate-200 text-slate-800' 
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {activeEmployeeIds.includes(emp.id) ? 'Active' : 'Offline'}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap text-xs font-medium">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            openProfileModal(emp)
+                          }}
+                          className="text-slate-800 hover:opacity-80 mr-3"
+                          title="View employee profile and work statistics"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleEditEmployee(emp)
+                          }}
+                          className="text-slate-800 hover:opacity-80 mr-3"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            openDeleteModal(emp)
+                          }}
+                          className="text-red-500 hover:text-red-600"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           ) : (
             <div className="p-12 text-center">
@@ -653,7 +668,7 @@ const Employees: React.FC = () => {
               <div className="mt-6">
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-slate-800 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors"
                 >
                   <svg className="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -670,7 +685,7 @@ const Employees: React.FC = () => {
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-3">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[85vh] overflow-hidden">
             {/* Header */}
-            <div className="bg-primary px-4 py-3">
+              <div className="bg-primary px-4 py-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
@@ -802,7 +817,7 @@ const Employees: React.FC = () => {
                 </button>
                 <button
                   onClick={handleCreateEmployee}
-                  className="px-3 py-1.5 bg-primary hover:opacity-90 text-white rounded text-xs font-medium transition-colors flex items-center space-x-1"
+                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-xs font-medium transition-colors flex items-center space-x-1"
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -820,7 +835,7 @@ const Employees: React.FC = () => {
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-3">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[85vh] overflow-hidden">
             {/* Header */}
-            <div className="bg-primary px-4 py-3">
+              <div className="bg-primary px-4 py-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
@@ -979,7 +994,7 @@ const Employees: React.FC = () => {
                 </button>
                 <button
                   onClick={handleSaveEmployee}
-                  className="px-3 py-1.5 bg-primary hover:opacity-90 text-white rounded text-xs font-medium transition-colors flex items-center space-x-1"
+                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-xs font-medium transition-colors flex items-center space-x-1"
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -1064,20 +1079,20 @@ const Employees: React.FC = () => {
 
       {/* Employee Profile Modal */}
       {showProfileModal && selectedEmployee && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
-          <div className="relative top-10 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
-            <div className="mt-1">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center">
-                  <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-lg font-medium text-primary">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-3">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
+            {/* Header */}
+            <div className="bg-slate-800 px-4 py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="h-10 w-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <span className="text-lg font-semibold text-white">
                       {selectedEmployee.name.split(' ').map(n => n[0]).join('')}
                     </span>
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900">{selectedEmployee.name}</h3>
-                    <p className="text-sm text-gray-500">{selectedEmployee.email}</p>
-                    <p className="text-xs text-gray-400">{selectedEmployee.destination}</p>
+                    <h3 className="text-lg font-bold text-white">{selectedEmployee.name}</h3>
+                    <p className="text-white/80 text-sm">{selectedEmployee.email}</p>
                   </div>
                 </div>
                 <button 
@@ -1086,161 +1101,138 @@ const Employees: React.FC = () => {
                     setSelectedEmployee(null)
                     setEmployeeStats(null)
                   }} 
-                  className="text-gray-400 hover:text-gray-600"
+                  className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
                 >
-                  ✕
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
               </div>
+            </div>
 
+            <div className="p-4 space-y-4 overflow-y-auto max-h-[calc(90vh-120px)]">
               {loadingStats ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-800"></div>
                   <span className="ml-2 text-gray-600">Loading statistics...</span>
                 </div>
               ) : employeeStats ? (
-                <div className="space-y-6">
+                <>
                   {/* Overview Stats */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">{employeeStats.overview.totalLeadsAssigned}</div>
-                      <div className="text-sm text-blue-800">Total Leads</div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="bg-slate-100 p-3 rounded-lg">
+                      <div className="text-xl font-bold text-slate-800">{employeeStats.overview.totalLeadsAssigned}</div>
+                      <div className="text-xs text-slate-600">Total Leads</div>
                     </div>
-                    <div className="bg-green-50 p-4 rounded-lg">
-                      <div className="text-2xl font-bold text-green-600">{employeeStats.overview.totalBookings}</div>
-                      <div className="text-sm text-green-800">Bookings</div>
+                    <div className="bg-slate-100 p-3 rounded-lg">
+                      <div className="text-xl font-bold text-slate-800">{employeeStats.overview.totalBookings}</div>
+                      <div className="text-xs text-slate-600">Bookings</div>
                     </div>
-                    <div className="bg-purple-50 p-4 rounded-lg">
-                      <div className="text-2xl font-bold text-purple-600">{employeeStats.overview.conversionRate}%</div>
-                      <div className="text-sm text-purple-800">Conversion Rate</div>
+                    <div className="bg-slate-100 p-3 rounded-lg">
+                      <div className="text-xl font-bold text-slate-800">{employeeStats.overview.conversionRate}%</div>
+                      <div className="text-xs text-slate-600">Conversion Rate</div>
                     </div>
-                    <div className="bg-yellow-50 p-4 rounded-lg">
-                      <div className="text-2xl font-bold text-yellow-600">₹{employeeStats.overview.totalRevenue.toLocaleString()}</div>
-                      <div className="text-sm text-yellow-800">Revenue</div>
-                    </div>
-                  </div>
-
-                  {/* Leads Status */}
-                  <div className="bg-white border rounded-lg p-4">
-                    <h4 className="text-lg font-semibold text-gray-900 mb-3">Leads Status</h4>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-gray-600">{employeeStats.leads.byStatus.new}</div>
-                        <div className="text-sm text-gray-500">New Leads</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">{employeeStats.leads.byStatus.contacted}</div>
-                        <div className="text-sm text-gray-500">Contacted</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{employeeStats.leads.byStatus.converted}</div>
-                        <div className="text-sm text-gray-500">Converted</div>
-                      </div>
+                    <div className="bg-slate-100 p-3 rounded-lg">
+                      <div className="text-xl font-bold text-slate-800">₹{employeeStats.overview.totalRevenue.toLocaleString()}</div>
+                      <div className="text-xs text-slate-600">Revenue</div>
                     </div>
                   </div>
 
-                  {/* Bookings Status */}
-                  <div className="bg-white border rounded-lg p-4">
-                    <h4 className="text-lg font-semibold text-gray-900 mb-3">Bookings Status</h4>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-yellow-600">{employeeStats.bookings.byStatus.pending}</div>
-                        <div className="text-sm text-gray-500">Pending</div>
+                  {/* Leads & Bookings Status */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-slate-100 rounded-lg p-3">
+                      <h4 className="text-sm font-semibold text-slate-800 mb-2">Leads Status</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-slate-800">{employeeStats.leads.byStatus.new}</div>
+                          <div className="text-xs text-slate-600">New</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-slate-800">{employeeStats.leads.byStatus.contacted}</div>
+                          <div className="text-xs text-slate-600">Contacted</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-slate-800">{employeeStats.leads.byStatus.converted}</div>
+                          <div className="text-xs text-slate-600">Converted</div>
+                        </div>
                       </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{employeeStats.bookings.byStatus.confirmed}</div>
-                        <div className="text-sm text-gray-500">Confirmed</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-red-600">{employeeStats.bookings.byStatus.cancelled}</div>
-                        <div className="text-sm text-gray-500">Cancelled</div>
+                    </div>
+
+                    <div className="bg-slate-100 rounded-lg p-3">
+                      <h4 className="text-sm font-semibold text-slate-800 mb-2">Bookings Status</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-slate-800">{employeeStats.bookings.byStatus.pending}</div>
+                          <div className="text-xs text-slate-600">Pending</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-slate-800">{employeeStats.bookings.byStatus.confirmed}</div>
+                          <div className="text-xs text-slate-600">Confirmed</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-slate-800">{employeeStats.bookings.byStatus.cancelled}</div>
+                          <div className="text-xs text-slate-600">Cancelled</div>
+                        </div>
                       </div>
                     </div>
                   </div>
-
-                  {/* Payment Status */}
-                  <div className="bg-white border rounded-lg p-4">
-                    <h4 className="text-lg font-semibold text-gray-900 mb-3">Payment Status</h4>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-yellow-600">{employeeStats.payments.byStatus.pending}</div>
-                        <div className="text-sm text-gray-500">Pending</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{employeeStats.payments.byStatus.paid}</div>
-                        <div className="text-sm text-gray-500">Paid</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-red-600">{employeeStats.payments.byStatus.failed}</div>
-                        <div className="text-sm text-gray-500">Failed</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Destination Performance */}
-                  {Object.keys(employeeStats.destinations).length > 0 && (
-                    <div className="bg-white border rounded-lg p-4">
-                      <h4 className="text-lg font-semibold text-gray-900 mb-3">Performance by Destination</h4>
-                      <div className="space-y-2">
-                        {Object.entries(employeeStats.destinations).map(([destination, stats]: [string, any]) => (
-                          <div key={destination} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                            <span className="font-medium">{destination}</span>
-                            <div className="flex gap-4 text-sm">
-                              <span className="text-blue-600">{stats.leads} leads</span>
-                              <span className="text-green-600">{stats.bookings} bookings</span>
-                              <span className="text-purple-600">₹{stats.revenue.toLocaleString()}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
 
                   {/* Recent Activity */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-white border rounded-lg p-4">
-                      <h4 className="text-lg font-semibold text-gray-900 mb-3">Recent Leads</h4>
-                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                    <div className="bg-slate-100 rounded-lg p-3">
+                      <h4 className="text-sm font-semibold text-slate-800 mb-2">Recent Leads</h4>
+                      <div className="space-y-2 max-h-32 overflow-y-auto">
                         {employeeStats.leads.recent.length > 0 ? (
-                          employeeStats.leads.recent.map((lead: any) => (
-                            <div key={lead.id} className="p-2 bg-gray-50 rounded text-sm">
-                              <div className="font-medium">{lead.name}</div>
-                              <div className="text-gray-500">{lead.destination} • {lead.email}</div>
-                              <div className="text-xs text-gray-400">
-                                {new Date(lead.created_at).toLocaleDateString()}
-                              </div>
+                          employeeStats.leads.recent.slice(0, 3).map((lead: any) => (
+                            <div key={lead.id} className="bg-white p-2 rounded text-xs">
+                              <div className="font-medium text-slate-800">{lead.name}</div>
+                              <div className="text-slate-600">{lead.destination}</div>
                             </div>
                           ))
                         ) : (
-                          <p className="text-gray-500 text-sm">No leads assigned yet</p>
+                          <p className="text-slate-600 text-xs">No leads assigned yet</p>
                         )}
                       </div>
                     </div>
 
-                    <div className="bg-white border rounded-lg p-4">
-                      <h4 className="text-lg font-semibold text-gray-900 mb-3">Recent Bookings</h4>
-                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                    <div className="bg-slate-100 rounded-lg p-3">
+                      <h4 className="text-sm font-semibold text-slate-800 mb-2">Recent Bookings</h4>
+                      <div className="space-y-2 max-h-32 overflow-y-auto">
                         {employeeStats.bookings.recent.length > 0 ? (
-                          employeeStats.bookings.recent.map((booking: any) => (
-                            <div key={booking.id} className="p-2 bg-gray-50 rounded text-sm">
-                              <div className="font-medium">{booking.customer}</div>
-                              <div className="text-gray-500">{booking.destination} • ₹{booking.amount?.toLocaleString()}</div>
-                              <div className="text-xs text-gray-400">
-                                {booking.status} • {new Date(booking.created_at).toLocaleDateString()}
-                              </div>
+                          employeeStats.bookings.recent.slice(0, 3).map((booking: any) => (
+                            <div key={booking.id} className="bg-white p-2 rounded text-xs">
+                              <div className="font-medium text-slate-800">{booking.customer}</div>
+                              <div className="text-slate-600">₹{booking.amount?.toLocaleString()}</div>
                             </div>
                           ))
                         ) : (
-                          <p className="text-gray-500 text-sm">No bookings yet</p>
+                          <p className="text-slate-600 text-xs">No bookings yet</p>
                         )}
                       </div>
                     </div>
                   </div>
-                </div>
+                </>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-gray-500">Failed to load employee statistics</p>
+                  <p className="text-slate-600">Failed to load employee statistics</p>
                 </div>
               )}
+            </div>
+
+            {/* Footer */}
+            <div className="bg-slate-100 px-4 py-3 border-t border-slate-200">
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => {
+                    setShowProfileModal(false)
+                    setSelectedEmployee(null)
+                    setEmployeeStats(null)
+                  }}
+                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-xs font-medium transition-colors"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>

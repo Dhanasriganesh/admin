@@ -107,27 +107,11 @@ const Leads: React.FC = () => {
   })
 
   const getSourceColor = (source: string): string => {
-    switch (source) {
-      case 'enquiry': return 'bg-primary/10 text-primary'
-      case 'google_ads': return 'bg-blue-100 text-blue-800'
-      case 'website': return 'bg-green-100 text-green-800'
-      case 'whatsapp': return 'bg-green-100 text-green-800'
-      case 'phone': return 'bg-orange-100 text-orange-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
+    return 'bg-slate-100 text-slate-800'
   }
 
   const getDestinationColor = (destination: string): string => {
-    switch (destination) {
-      case 'Kashmir': return 'bg-blue-100 text-blue-800'
-      case 'Ladakh': return 'bg-purple-100 text-purple-800'
-      case 'Kerala': return 'bg-green-100 text-green-800'
-      case 'Gokarna': return 'bg-yellow-100 text-yellow-800'
-      case 'Meghalaya': return 'bg-indigo-100 text-indigo-800'
-      case 'Mysore': return 'bg-pink-100 text-pink-800'
-      case 'Singapore': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
+    return 'bg-slate-100 text-slate-800'
   }
 
   const openLeadDetails = (lead: Lead): void => {
@@ -472,7 +456,7 @@ const Leads: React.FC = () => {
             )}
             <button
               onClick={() => setShowCreateModal(true)}
-              className="px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white rounded-md text-sm font-medium transition-colors flex items-center space-x-2"
+              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-md text-sm font-medium transition-colors flex items-center space-x-2"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -489,14 +473,14 @@ const Leads: React.FC = () => {
           <div className="p-3">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-6 h-6 bg-primary rounded-md flex items-center justify-center">
+                <div className="w-6 h-6 bg-slate-800 rounded-md flex items-center justify-center">
                   <span className="text-white text-xs font-medium">L</span>
                 </div>
               </div>
               <div className="ml-3 w-0 flex-1">
                 <dl>
-                  <dt className="text-xs font-medium text-gray-500 truncate">Total Leads</dt>
-                  <dd className="text-sm font-medium text-gray-900">{leads.length}</dd>
+                  <dt className="text-xs font-medium text-slate-800 truncate">Total Leads</dt>
+                  <dd className="text-sm font-medium text-slate-800">{leads.length}</dd>
                 </dl>
               </div>
             </div>
@@ -507,14 +491,14 @@ const Leads: React.FC = () => {
           <div className="p-3">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-6 h-6 bg-primary rounded-md flex items-center justify-center">
+                <div className="w-6 h-6 bg-slate-800 rounded-md flex items-center justify-center">
                   <span className="text-white text-xs font-medium">E</span>
                 </div>
               </div>
               <div className="ml-3 w-0 flex-1">
                 <dl>
-                  <dt className="text-xs font-medium text-gray-500 truncate">Enquiries</dt>
-                  <dd className="text-sm font-medium text-gray-900">{leads.filter(l => l.source === 'enquiry').length}</dd>
+                  <dt className="text-xs font-medium text-slate-800 truncate">Enquiries</dt>
+                  <dd className="text-sm font-medium text-slate-800">{leads.filter(l => l.source === 'enquiry').length}</dd>
                 </dl>
               </div>
             </div>
@@ -525,14 +509,14 @@ const Leads: React.FC = () => {
           <div className="p-3">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-6 h-6 bg-primary rounded-md flex items-center justify-center">
+                <div className="w-6 h-6 bg-slate-800 rounded-md flex items-center justify-center">
                   <span className="text-white text-xs font-medium">S</span>
                 </div>
               </div>
               <div className="ml-3 w-0 flex-1">
                 <dl>
-                  <dt className="text-xs font-medium text-gray-500 truncate">Social Leads</dt>
-                  <dd className="text-sm font-medium text-gray-900">
+                  <dt className="text-xs font-medium text-slate-800 truncate">Social Leads</dt>
+                  <dd className="text-sm font-medium text-slate-800">
                     {leads.filter(l => 
                       l.source === 'Meta Ads' || 
                       l.source === 'Whatsapp' || 
@@ -553,14 +537,14 @@ const Leads: React.FC = () => {
           <div className="p-3">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-6 h-6 bg-primary rounded-md flex items-center justify-center">
+                <div className="w-6 h-6 bg-slate-800 rounded-md flex items-center justify-center">
                   <span className="text-white text-xs font-medium">T</span>
                 </div>
               </div>
               <div className="ml-3 w-0 flex-1">
                 <dl>
-                  <dt className="text-xs font-medium text-gray-500 truncate">Today</dt>
-                  <dd className="text-sm font-medium text-gray-900">
+                  <dt className="text-xs font-medium text-slate-800 truncate">Today</dt>
+                  <dd className="text-sm font-medium text-slate-800">
                     {leads.filter(l => {
                       const today = new Date().toDateString()
                       const leadDate = new Date(l.created_at).toDateString()
@@ -580,7 +564,7 @@ const Leads: React.FC = () => {
           <button
             onClick={() => setFilter('all')}
             className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
-              filter === 'all' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'all' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             All ({leads.length})
@@ -588,7 +572,7 @@ const Leads: React.FC = () => {
           <button
             onClick={() => setFilter('Kashmir')}
             className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
-              filter === 'Kashmir' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'Kashmir' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Kashmir ({leads.filter(l => l.destination === 'Kashmir').length})
@@ -596,7 +580,7 @@ const Leads: React.FC = () => {
           <button
             onClick={() => setFilter('Ladakh')}
             className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
-              filter === 'Ladakh' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'Ladakh' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Ladakh ({leads.filter(l => l.destination === 'Ladakh').length})
@@ -604,7 +588,7 @@ const Leads: React.FC = () => {
           <button
             onClick={() => setFilter('Kerala')}
             className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
-              filter === 'Kerala' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'Kerala' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Kerala ({leads.filter(l => l.destination === 'Kerala').length})
@@ -612,7 +596,7 @@ const Leads: React.FC = () => {
           <button
             onClick={() => setFilter('Gokarna')}
             className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
-              filter === 'Gokarna' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'Gokarna' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Gokarna ({leads.filter(l => l.destination === 'Gokarna').length})
@@ -620,7 +604,7 @@ const Leads: React.FC = () => {
           <button
             onClick={() => setFilter('Meghalaya')}
             className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
-              filter === 'Meghalaya' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'Meghalaya' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Meghalaya ({leads.filter(l => l.destination === 'Meghalaya').length})
@@ -628,7 +612,7 @@ const Leads: React.FC = () => {
           <button
             onClick={() => setFilter('Mysore')}
             className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
-              filter === 'Mysore' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'Mysore' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Mysore ({leads.filter(l => l.destination === 'Mysore').length})
@@ -636,7 +620,7 @@ const Leads: React.FC = () => {
           <button
             onClick={() => setFilter('Singapore')}
             className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
-              filter === 'Singapore' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'Singapore' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Singapore ({leads.filter(l => l.destination === 'Singapore').length})
@@ -644,7 +628,7 @@ const Leads: React.FC = () => {
           <button
             onClick={() => setFilter('Hyderabad')}
             className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
-              filter === 'Hyderabad' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'Hyderabad' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Hyderabad ({leads.filter(l => l.destination === 'Hyderabad').length})
@@ -652,7 +636,7 @@ const Leads: React.FC = () => {
           <button
             onClick={() => setFilter('Bengaluru')}
             className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
-              filter === 'Bengaluru' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'Bengaluru' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Bengaluru ({leads.filter(l => l.destination === 'Bengaluru').length})
@@ -660,7 +644,7 @@ const Leads: React.FC = () => {
           <button
             onClick={() => setFilter('Manali')}
             className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
-              filter === 'Manali' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'Manali' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Manali ({leads.filter(l => l.destination === 'Manali').length})
@@ -730,12 +714,12 @@ const Leads: React.FC = () => {
                     <td className="px-3 py-2 whitespace-nowrap text-xs">
                       {lead.assigned_employee_id ? (
                         <div className="flex items-center space-x-2">
-                          <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">
+                          <span className="px-2 py-1 bg-slate-100 text-slate-800 rounded text-xs font-medium">
                             Assigned
                           </span>
                           <button
                             onClick={() => openAssignModal(lead)}
-                            className="text-primary hover:opacity-80 text-xs"
+                            className="text-slate-800 hover:opacity-80 text-xs"
                           >
                             Change
                           </button>
@@ -743,7 +727,7 @@ const Leads: React.FC = () => {
                       ) : (
                         <button
                           onClick={() => openAssignModal(lead)}
-                          className="px-2 py-1 rounded bg-primary text-white hover:opacity-90 text-xs"
+                          className="px-2 py-1 rounded bg-slate-800 text-white hover:bg-slate-700 text-xs"
                         >
                           Assign To
                         </button>
@@ -752,7 +736,7 @@ const Leads: React.FC = () => {
                     <td className="px-3 py-2 whitespace-nowrap text-xs font-medium">
                       <button
                         onClick={() => openLeadDetails(lead)}
-                        className="text-primary hover:opacity-80 mr-3"
+                        className="text-slate-800 hover:opacity-80 mr-3"
                       >
                         View Details
                       </button>
@@ -777,7 +761,7 @@ const Leads: React.FC = () => {
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-3">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[85vh] overflow-hidden">
             {/* Header */}
-            <div className="bg-primary px-4 py-3">
+            <div className="bg-slate-800 px-4 py-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
@@ -803,9 +787,9 @@ const Leads: React.FC = () => {
 
             <div className="p-4 space-y-4 overflow-y-auto max-h-[calc(85vh-120px)]">
               {/* Lead Avatar & Basic Info */}
-              <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
+              <div className="bg-slate-100 rounded-lg p-3 border border-slate-200">
                 <div className="flex items-start space-x-3">
-                  <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center">
                     <span className="text-white font-bold text-sm">
                       {selectedLead.name?.charAt(0)?.toUpperCase() || 'L'}
                     </span>
@@ -814,7 +798,7 @@ const Leads: React.FC = () => {
                     <h4 className="text-base font-semibold text-gray-900 mb-1">{selectedLead.name || 'N/A'}</h4>
                     <p className="text-gray-600 text-sm mb-2">{selectedLead.email || 'N/A'}</p>
                     <div className="flex items-center space-x-2">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-200 text-slate-800">
                         <svg className="w-2 h-2 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -829,7 +813,7 @@ const Leads: React.FC = () => {
               {/* Contact Information */}
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-gray-900 flex items-center space-x-1">
-                  <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
                   <span>Contact Information</span>
@@ -837,7 +821,7 @@ const Leads: React.FC = () => {
                 <div className="grid grid-cols-1 gap-3">
                   <div className="bg-white border border-gray-200 rounded-lg p-3">
                     <div className="flex items-center space-x-2 mb-1">
-                      <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
                       <span className="text-xs font-medium text-gray-700">Email</span>
@@ -846,7 +830,7 @@ const Leads: React.FC = () => {
                   </div>
                   <div className="bg-white border border-gray-200 rounded-lg p-3">
                     <div className="flex items-center space-x-2 mb-1">
-                      <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                       </svg>
                       <span className="text-xs font-medium text-gray-700">Phone</span>
@@ -859,7 +843,7 @@ const Leads: React.FC = () => {
               {/* Travel Information */}
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-gray-900 flex items-center space-x-1">
-                  <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
@@ -868,7 +852,7 @@ const Leads: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-white border border-gray-200 rounded-lg p-3">
                     <div className="flex items-center space-x-2 mb-1">
-                      <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                       </svg>
                       <span className="text-xs font-medium text-gray-700">Travelers</span>
@@ -877,7 +861,7 @@ const Leads: React.FC = () => {
                   </div>
                   <div className="bg-white border border-gray-200 rounded-lg p-3">
                     <div className="flex items-center space-x-2 mb-1">
-                      <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                       <span className="text-xs font-medium text-gray-700">Travel Dates</span>
@@ -890,7 +874,7 @@ const Leads: React.FC = () => {
               {/* Additional Information */}
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-gray-900 flex items-center space-x-1">
-                  <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <span>Additional Information</span>
@@ -898,7 +882,7 @@ const Leads: React.FC = () => {
                 <div className="space-y-3">
                   <div className="bg-white border border-gray-200 rounded-lg p-3">
                     <div className="flex items-center space-x-2 mb-1">
-                      <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <span className="text-xs font-medium text-gray-700">Source</span>
@@ -907,7 +891,7 @@ const Leads: React.FC = () => {
                   </div>
                   <div className="bg-white border border-gray-200 rounded-lg p-3">
                     <div className="flex items-center space-x-2 mb-1">
-                      <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                       <span className="text-xs font-medium text-gray-700">Notes</span>
@@ -916,7 +900,7 @@ const Leads: React.FC = () => {
                   </div>
                   <div className="bg-white border border-gray-200 rounded-lg p-3">
                     <div className="flex items-center space-x-2 mb-1">
-                      <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <span className="text-xs font-medium text-gray-700">Submitted</span>
@@ -928,7 +912,7 @@ const Leads: React.FC = () => {
             </div>
 
             {/* Footer */}
-            <div className="bg-primary/5 px-4 py-3 border-t border-primary/20">
+            <div className="bg-slate-100 px-4 py-3 border-t border-slate-200">
               <div className="flex justify-end space-x-2">
                 <button
                   onClick={() => setShowModal(false)}
@@ -948,7 +932,7 @@ const Leads: React.FC = () => {
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-3">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[85vh] overflow-hidden">
             {/* Header */}
-            <div className="bg-primary px-4 py-3">
+            <div className="bg-slate-800 px-4 py-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
@@ -974,9 +958,9 @@ const Leads: React.FC = () => {
 
             <div className="p-4 space-y-3 overflow-y-auto max-h-[calc(85vh-100px)]">
               {/* Lead Info Card */}
-              <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
+              <div className="bg-slate-100 rounded-lg p-3 border border-slate-200">
                 <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center">
                     <span className="text-white font-bold text-xs">
                       {assigningLead.name?.charAt(0)?.toUpperCase() || 'L'}
                     </span>
@@ -985,7 +969,7 @@ const Leads: React.FC = () => {
                     <h4 className="text-sm font-semibold text-gray-900 mb-1">{assigningLead.name}</h4>
                     <p className="text-gray-600 text-xs mb-1">{assigningLead.email}</p>
                     <div className="flex items-center space-x-1">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-200 text-slate-800">
                         <svg className="w-2 h-2 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -999,23 +983,23 @@ const Leads: React.FC = () => {
 
               {/* Current Assignment Status */}
               {assigningLead.assigned_employee_id && (
-                <div className="bg-primary/5 border border-primary/20 rounded-lg p-3">
+                <div className="bg-slate-100 border border-slate-200 rounded-lg p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                      <div className="w-6 h-6 bg-slate-800 rounded-full flex items-center justify-center">
                         <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
                       <div>
-                        <div className="text-xs font-medium text-primary mb-0.5">Currently Assigned</div>
+                        <div className="text-xs font-medium text-slate-800 mb-0.5">Currently Assigned</div>
                         <div className="text-sm font-semibold text-gray-900">{assigningLead.assigned_employee_name}</div>
                         <div className="text-xs text-gray-600">{assigningLead.assigned_employee_email}</div>
                       </div>
                     </div>
                     <button
                       onClick={handleUnassignLead}
-                      className="px-2 py-1 bg-primary hover:opacity-90 text-white rounded text-xs font-medium transition-colors flex items-center space-x-1"
+                      className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded text-xs font-medium transition-colors flex items-center space-x-1"
                     >
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1029,7 +1013,7 @@ const Leads: React.FC = () => {
               {/* Search Section */}
               <div className="space-y-2">
                 <h4 className="text-sm font-semibold text-gray-900 flex items-center space-x-1">
-                  <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                   <span>Available Employees</span>
@@ -1040,7 +1024,7 @@ const Leads: React.FC = () => {
                     placeholder="Search employees..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-3 py-2 pl-8 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent transition-all"
+                    className="w-full px-3 py-2 pl-8 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-slate-500 focus:border-transparent transition-all"
                   />
                   <svg className="absolute left-2 top-2.5 w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -1053,14 +1037,14 @@ const Leads: React.FC = () => {
                 {loadingEmployees ? (
                   <div className="flex items-center justify-center py-6">
                     <div className="flex items-center space-x-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-800"></div>
                       <span className="text-gray-600 text-xs">Loading employees...</span>
                     </div>
                   </div>
                 ) : filteredEmployees.length === 0 ? (
                   <div className="text-center py-6">
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <svg className="w-5 h-5 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                       </svg>
                     </div>
@@ -1077,15 +1061,15 @@ const Leads: React.FC = () => {
                           key={emp.id} 
                           className={`p-2 rounded-lg border transition-all duration-200 ${
                             isAssigned 
-                              ? 'bg-primary/5 border-primary/20 shadow-sm' 
-                              : 'bg-white border-gray-200 hover:border-primary/30 hover:shadow-sm'
+                              ? 'bg-slate-100 border-slate-200 shadow-sm' 
+                              : 'bg-white border-gray-200 hover:border-slate-300 hover:shadow-sm'
                           }`}
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-2">
                               <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
                                 isAssigned 
-                                  ? 'bg-primary' 
+                                  ? 'bg-slate-800' 
                                   : 'bg-gray-400'
                               }`}>
                                 <span className="text-white font-semibold text-xs">
@@ -1100,8 +1084,8 @@ const Leads: React.FC = () => {
                             <div className="flex items-center space-x-2">
                               {isAssigned ? (
                                 <div className="flex items-center space-x-1">
-                                  <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
-                                  <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-xs font-medium">
+                                  <div className="w-1.5 h-1.5 bg-slate-800 rounded-full"></div>
+                                  <span className="px-2 py-0.5 bg-slate-200 text-slate-800 rounded text-xs font-medium">
                                     Assigned
                                   </span>
                                 </div>
@@ -1109,7 +1093,7 @@ const Leads: React.FC = () => {
                                 <button
                                   onClick={() => handleAssignLead(emp.id, emp.name, emp.email)}
                                   disabled={assigning}
-                                  className="px-2 py-1 bg-primary hover:opacity-90 text-white rounded text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                                  className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
                                 >
                                   {assigning ? (
                                     <>
@@ -1132,11 +1116,11 @@ const Leads: React.FC = () => {
             </div>
 
             {/* Footer */}
-            <div className="bg-primary/5 px-4 py-3 border-t border-primary/20">
+            <div className="bg-slate-100 px-4 py-3 border-t border-slate-200">
               <div className="flex justify-end">
                 <button 
                   onClick={() => setShowAssignModal(false)} 
-                  className="px-3 py-1.5 bg-primary hover:opacity-90 text-white rounded text-xs font-medium transition-colors"
+                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-xs font-medium transition-colors"
                 >
                   Close
                 </button>
@@ -1151,7 +1135,7 @@ const Leads: React.FC = () => {
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-3">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-hidden">
             {/* Header */}
-            <div className="bg-primary px-4 py-3">
+            <div className="bg-slate-800 px-4 py-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
@@ -1179,7 +1163,7 @@ const Leads: React.FC = () => {
               {/* Basic Information */}
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-gray-900 flex items-center space-x-1">
-                  <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                   <span>Basic Information</span>
@@ -1225,7 +1209,7 @@ const Leads: React.FC = () => {
               {/* Travel Information */}
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-gray-900 flex items-center space-x-1">
-                  <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
@@ -1277,7 +1261,7 @@ const Leads: React.FC = () => {
               {/* Lead Source */}
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-gray-900 flex items-center space-x-1">
-                  <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <span>Lead Source</span>
@@ -1311,7 +1295,7 @@ const Leads: React.FC = () => {
               {/* Additional Notes */}
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-gray-900 flex items-center space-x-1">
-                  <svg className="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   <span>Additional Notes</span>
@@ -1330,7 +1314,7 @@ const Leads: React.FC = () => {
             </div>
 
             {/* Footer */}
-            <div className="bg-primary/5 px-4 py-3 border-t border-primary/20">
+            <div className="bg-slate-100 px-4 py-3 border-t border-slate-200">
               <div className="flex justify-end space-x-2">
                 <button
                   onClick={() => setShowCreateModal(false)}
@@ -1341,7 +1325,7 @@ const Leads: React.FC = () => {
                 <button
                   onClick={handleCreateLead}
                   disabled={isCreating}
-                  className="px-3 py-1.5 bg-primary hover:opacity-90 text-white rounded text-xs font-medium transition-colors flex items-center space-x-1 disabled:opacity-50"
+                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-xs font-medium transition-colors flex items-center space-x-1 disabled:opacity-50"
                 >
                   {isCreating ? (
                     <>
